@@ -128,7 +128,7 @@ public class CarDiagService extends Service {
         }
         PendingIntent open = PendingIntent.getActivity(this, 0,
                 new Intent(this, DiagnosticsActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
-        return b.setSmallIcon(R.mipmap.ic_launcher)
+        return b.setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(getString(R.string.diag_title))
                 .setContentText(getString(R.string.diag_notification))
                 .setContentIntent(open)

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Значок уведомления о записи: силуэт машины из иконки приложения, одним цветом (строка состояния берёт только прозрачность). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:tint="#FFFFFF"
+    android:viewportWidth="54"
+    android:viewportHeight="54">
+    <group
+        android:translateX="-27"
+        android:translateY="-29">
+        <path
+            android:fillColor="#FFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M33,52 L37.5,41 Q38.5,38.5 41.5,38.5 L66.5,38.5 Q69.5,38.5 70.5,41 L75,52 Q79,53 79,57 L79,66 Q79,68 77,68 L31,68 Q29,68 29,66 L29,57 Q29,53 33,52 Z M34,67 L39,67 Q41,67 41,69 L41,72 Q41,74 39,74 L34,74 Q32,74 32,72 L32,69 Q32,67 34,67 Z M69,67 L74,67 Q76,67 76,69 L76,72 Q76,74 74,74 L69,74 Q67,74 67,72 L67,69 Q67,67 69,67 Z M37,51 L40.5,42.5 Q41,41.5 42.5,41.5 L65.5,41.5 Q67,41.5 67.5,42.5 L71,51 Z M46.5,58 L61.5,58 Q63,58 63,59.5 L63,60.5 Q63,62 61.5,62 L46.5,62 Q45,62 45,60.5 L45,59.5 Q45,58 46.5,58 Z M33.3,59 A3.2,3.2 0,1 1,39.7 59 A3.2,3.2 0,1 1,33.3 59 Z M68.3,59 A3.2,3.2 0,1 1,74.7 59 A3.2,3.2 0,1 1,68.3 59 Z" />
+    </group>
+</vector>
