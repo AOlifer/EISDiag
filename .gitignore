@@ -1,0 +1,65 @@
+# =========================
+# Ключи подписи — НИКОГДА не коммитить
+# =========================
+# Платформенные ключи (platform.pk8 / platform_binary.pk8 / platform.x509.pem) лежат вне репозитория
+# или в локальной папке keys/. Сгенерированный platform.p12 создаётся в build/signing/.
+/keys/
+*.pk8
+*.p12
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+
+# =========================
+# Gradle / Android build
+# =========================
+.gradle/
+.kotlin/
+build/
+/captures/
+.cxx/
+.externalNativeBuild/
+
+# Локальный путь к SDK
+local.properties
+
+# Готовые сборки
+*.apk
+*.aab
+*.ap_
+*.dex
+*.idsig
+/app/release/
+/app/debug/
+output-metadata.json
+mapping.txt
+
+# =========================
+# Android Studio / IntelliJ IDEA
+# =========================
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# =========================
+# OS / редакторы / временные
+# =========================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+*~
+*.swp
+*.swo
+*.tmp
+*.temp
+*.log
+
+# =========================
+# Секреты окружения
+# =========================
+.env
+.env.*
+!.env.example

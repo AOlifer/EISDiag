@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Три колонки: накопители слева, подпапки по центру, что будет сохранено и кнопка действия справа. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout style="@style/EISDiag.TopBar">
+
+        <Button
+            android:id="@+id/btnBack"
+            style="@style/EISDiag.TextButton"
+            android:text="@string/back" />
+
+        <TextView
+            android:id="@+id/pickerTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:singleLine="true"
+            android:textColor="@color/text_primary"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnRefresh"
+            style="@style/EISDiag.TextButton"
+            android:text="@string/refresh" />
+    </LinearLayout>
+
+    <View style="@style/EISDiag.Divider" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            style="@style/EISDiag.SidePanel"
+            android:layout_width="@dimen/picker_storage_width">
+
+            <TextView
+                style="@style/EISDiag.Caption"
+                android:paddingStart="16dp"
+                android:paddingBottom="6dp"
+                android:text="@string/picker_storages" />
+
+            <LinearLayout
+                android:id="@+id/rootsBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </LinearLayout>
+
+        <View style="@style/EISDiag.VDivider" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/surface"
+            android:orientation="vertical">
+
+            <!-- Путь к текущей папке: каждая часть нажимается и возвращает в эту папку. -->
+            <HorizontalScrollView
+                android:id="@+id/crumbsScroll"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/crumbs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="16dp" />
+            </HorizontalScrollView>
+
+            <View style="@style/EISDiag.Divider" />
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <LinearLayout
+                    android:id="@+id/pickerList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </ScrollView>
+        </LinearLayout>
+
+        <View style="@style/EISDiag.VDivider" />
+
+        <LinearLayout
+            style="@style/EISDiag.SidePanel"
+            android:layout_width="@dimen/side_panel_width"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/sideTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_primary"
+                android:text="@string/picker_save_copy"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="6dp"
+                android:layout_weight="1">
+
+                <LinearLayout
+                    android:id="@+id/sideList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </ScrollView>
+
+            <TextView
+                android:id="@+id/pickerStatus"
+                style="@style/EISDiag.Caption"
+                android:layout_marginBottom="4dp" />
+
+            <Button
+                android:id="@+id/btnAction"
+                style="@style/EISDiag.PrimaryButton"
+                android:text="@string/picker_choose_folder" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

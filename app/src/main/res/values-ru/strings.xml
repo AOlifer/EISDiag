@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Русский перевод. Основной язык (по умолчанию) — английский, values/strings.xml. -->
+<resources>
+    <!-- Имя под значком в лаунчере. -->
+    <string name="app_label">Диагностика</string>
+
+    <!-- Общее -->
+    <string name="back">←  Назад</string>
+    <string name="refresh">Обновить</string>
+    <string name="save_where_title">Куда сохранить копию</string>
+    <string name="save_here">Сохранить сюда</string>
+    <string name="saved">Сохранено: %1$s</string>
+    <string name="save_failed">Не удалось сохранить %1$s</string>
+
+    <!-- Единицы и накопители -->
+    <string name="size_b">%1$d Б</string>
+    <string name="size_kb">%1$.1f КБ</string>
+    <string name="size_mb">%1$.1f МБ</string>
+    <string name="storage_internal">Память</string>
+    <string name="storage_usb">USB %1$s</string>
+
+    <!-- Экран выбора папки -->
+    <string name="picker_storages">Накопители</string>
+    <string name="picker_choose_folder">Выбрать эту папку</string>
+    <string name="picker_save_copy">Сохранить копию</string>
+    <string name="picker_storage_gone">Накопитель %1$s отключён</string>
+    <string name="picker_no_usb">Флешка не найдена. Вставьте её и нажмите «Обновить».</string>
+    <string name="picker_folder_unavailable">Папка недоступна</string>
+    <string name="picker_no_folders">Здесь нет вложенных папок</string>
+    <string name="picker_save_into">Копия будет сохранена в папку «%1$s».</string>
+    <string name="picker_not_writable">В эту папку нельзя записывать, выберите другую</string>
+
+    <!-- Диагностика машины -->
+    <string name="diag_title">Диагностика машины</string>
+    <string name="diag_notification">Идёт запись событий машины для диагностики</string>
+    <string name="diag_hint">Только чтение: в машину ничего не записывается. Включите запись, нажимайте «Отметка» перед каждым действием (выключить зажигание, открыть дверь, подключить телефон), затем сохраните файлы на флешку.</string>
+    <string name="diag_record_start">Начать запись событий</string>
+    <string name="diag_record_stop">Остановить запись</string>
+    <string name="diag_mark">Отметка в журнале</string>
+    <string name="diag_marked">Отметка %1$d добавлена</string>
+    <string name="diag_snapshot">Сделать снимок машины</string>
+    <string name="diag_snapshot_busy">Снимаю состояние машины…</string>
+    <string name="diag_snapshot_done">Снимок сохранён: %1$s</string>
+    <string name="diag_error">Ошибка: %1$s</string>
+    <string name="diag_save">Сохранить файлы в…</string>
+    <string name="diag_clear">Очистить журнал</string>
+    <string name="diag_files">Файлов: %1$d, %2$s</string>
+    <string name="diag_log_empty">Журнал пуст. Включите запись или сделайте снимок.</string>
+    <string name="diag_status_recording">Запись включена</string>
+    <string name="diag_status_idle">Запись выключена</string>
+    <string name="diag_car_connected">Сервис машины подключён</string>
+    <string name="diag_car_connecting">Подключение к сервису машины…</string>
+    <string name="diag_car_missing">В этой прошивке нет API машины</string>
+</resources>

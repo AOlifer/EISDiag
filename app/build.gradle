@@ -1,0 +1,125 @@
+import java.security.KeyFactory
+import java.security.KeyStore
+import java.security.cert.CertificateFactory
+import java.security.spec.PKCS8EncodedKeySpec
+
+plugins {
+    id 'com.android.application'
+}
+
+// ---------------------------------------------------------------------------------------------
+// Platform signing
+//
+// Приложение работает с android:sharedUserId="android.uid.system", поэтому APK должен быть
+// подписан платформенным ключом прошивки. Ключи НЕ хранятся в репозитории.
+//
+// Где ищутся ключи (первое найденное):
+//   1. -Peisdiag.keysDir=<путь>  или  eisdiag.keysDir=<путь> в %USERPROFILE%\.gradle\gradle.properties
+//   2. переменная окружения EISDIAG_KEYS_DIR
+//   3. <корень проекта>/keys  (папка в .gitignore)
+// В папке нужны: platform.x509.pem и platform.pk8 (или platform_binary.pk8 — старое имя).
+//
+// PKCS#12 для Gradle собирается из них автоматически в build/signing/ и тоже не коммитится.
+// Без ключей проект открывается и компилируется, но упаковка APK останавливается с понятной ошибкой.
+// ---------------------------------------------------------------------------------------------
+def keysDirSetting = (project.findProperty('eisdiag.keysDir') ?: System.getenv('EISDIAG_KEYS_DIR'))?.toString()
+def keysDir = keysDirSetting ? file(keysDirSetting) : rootProject.file('keys')
+def certFile = new File(keysDir, 'platform.x509.pem')
+def privateKeyFile = ['platform.pk8', 'platform_binary.pk8']
+        .collect { new File(keysDir, it) }
+        .find { it.exists() } ?: new File(keysDir, 'platform.pk8')
+def keystoreFile = rootProject.layout.buildDirectory.file('signing/platform.p12').get().asFile
+def keystorePassword = 'android'   // пароль локального временного p12, наружу файл не уходит
+def platformAlias = 'platform'
+def signingAvailable = privateKeyFile.exists() && certFile.exists()
+
+if (signingAvailable) {
+    boolean stale = !keystoreFile.exists() ||
+            keystoreFile.lastModified() < Math.max(privateKeyFile.lastModified(), certFile.lastModified())
+    if (stale) {
+        keystoreFile.parentFile.mkdirs()
+        def privateKey = KeyFactory.getInstance('RSA')
+                .generatePrivate(new PKCS8EncodedKeySpec(privateKeyFile.bytes))
+        def cert = certFile.withInputStream { CertificateFactory.getInstance('X.509').generateCertificate(it) }
+        KeyStore ks = KeyStore.getInstance('PKCS12')
+        ks.load(null, keystorePassword.toCharArray())
+        ks.setKeyEntry(platformAlias, privateKey, keystorePassword.toCharArray(),
+                [cert] as java.security.cert.Certificate[])
+        keystoreFile.withOutputStream { ks.store(it, keystorePassword.toCharArray()) }
+        logger.lifecycle("EISDiag: platform keystore создан из ${keysDir}")
+    }
+} else {
+    logger.warn("EISDiag: ключи платформы не найдены в ${keysDir} — APK не будет собран. См. README, раздел «Ключи».")
+}
+
+android {
+    namespace 'com.EISDiag'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.EISDiag'
+        minSdk 28
+        targetSdk 28
+        versionCode 1
+        versionName '1.0'
+    }
+
+    if (signingAvailable) {
+        signingConfigs {
+            create("platform") {
+                storeFile keystoreFile
+                storePassword keystorePassword
+                keyAlias platformAlias
+                keyPassword keystorePassword
+                storeType "PKCS12"
+            }
+        }
+    }
+
+    // Подпись задаётся во flavor'ах ниже; у build type она сброшена, иначе перекрыла бы flavor.
+    buildTypes {
+        debug {
+            signingConfig null
+        }
+        release {
+            minifyEnabled false
+            signingConfig null
+        }
+    }
+
+    // car      — APK для машины: system uid, платформенная подпись.
+    // emulator — APK для эмулятора Android Studio: без system uid (см. src/emulator/AndroidManifest.xml),
+    //            подпись обычным debug-ключом. Нужен только для проверки интерфейса: API машины
+    //            в эмуляторе нет, снимок и журнал содержат только свойства и ключи системы.
+    flavorDimensions = ['target']
+    productFlavors {
+        car {
+            dimension 'target'
+            if (signingAvailable) signingConfig signingConfigs.getByName("platform")
+        }
+        emulator {
+            dimension 'target'
+            applicationIdSuffix '.emulator'
+            versionNameSuffix '-emulator'
+            signingConfig signingConfigs.getByName('debug')
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// Без платформенного ключа APK всё равно не установится на машину (sharedUserId=system),
+// поэтому вместо тихой подписи debug-ключом останавливаем упаковку с понятным сообщением.
+if (!signingAvailable) {
+    tasks.matching { it.name ==~ /^(package|install)Car(Debug|Release)$/ }.configureEach {
+        doFirst {
+            throw new GradleException(
+                    "Нет ключей платформы (platform.x509.pem + platform.pk8) в ${keysDir}.\n" +
+                    "Укажите eisdiag.keysDir в %USERPROFILE%\\.gradle\\gradle.properties, " +
+                    "задайте EISDIAG_KEYS_DIR или положите файлы в папку keys/ проекта.")
+        }
+    }
+}

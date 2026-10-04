@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Основной язык приложения — английский (используется, если для языка системы нет перевода).
+    Переводы: values-ru (русский), values-de (немецкий), values-zh (китайский). Новый язык = values-<код>/strings.xml с теми же ключами.
+-->
+<resources>
+    <!-- Имя под значком в лаунчере. -->
+    <string name="app_label">Car Diagnostics</string>
+
+    <!-- Common -->
+    <string name="back">←  Back</string>
+    <string name="refresh">Refresh</string>
+    <string name="save_where_title">Where to save the copy</string>
+    <string name="save_here">Save here</string>
+    <string name="saved">Saved: %1$s</string>
+    <string name="save_failed">Could not save %1$s</string>
+
+    <!-- Units and storage -->
+    <string name="size_b">%1$d B</string>
+    <string name="size_kb">%1$.1f KB</string>
+    <string name="size_mb">%1$.1f MB</string>
+    <string name="storage_internal">Internal</string>
+    <string name="storage_usb">USB %1$s</string>
+
+    <!-- Folder picker -->
+    <string name="picker_storages">Storage</string>
+    <string name="picker_choose_folder">Choose this folder</string>
+    <string name="picker_save_copy">Save a copy</string>
+    <string name="picker_storage_gone">Storage %1$s was removed</string>
+    <string name="picker_no_usb">No USB drive found. Insert one and tap Refresh.</string>
+    <string name="picker_folder_unavailable">Folder is not accessible</string>
+    <string name="picker_no_folders">No subfolders here</string>
+    <string name="picker_save_into">The copy will be saved to “%1$s”.</string>
+    <string name="picker_not_writable">This folder is read-only, choose another one</string>
+
+    <!-- Car diagnostics -->
+    <string name="diag_title">Car diagnostics</string>
+    <string name="diag_notification">Recording car events for diagnostics</string>
+    <string name="diag_hint">Read only: nothing is written to the car. Start recording, press “Mark” before each action (switch the ignition off, open a door, connect the phone), then save the files to a USB drive.</string>
+    <string name="diag_record_start">Start recording events</string>
+    <string name="diag_record_stop">Stop recording</string>
+    <string name="diag_mark">Mark in the log</string>
+    <string name="diag_marked">Mark %1$d added</string>
+    <string name="diag_snapshot">Take a snapshot of the car</string>
+    <string name="diag_snapshot_busy">Taking a snapshot…</string>
+    <string name="diag_snapshot_done">Snapshot saved: %1$s</string>
+    <string name="diag_error">Error: %1$s</string>
+    <string name="diag_save">Save files to…</string>
+    <string name="diag_clear">Clear the log</string>
+    <string name="diag_files">Files: %1$d, %2$s</string>
+    <string name="diag_log_empty">The log is empty. Start recording or take a snapshot.</string>
+    <string name="diag_status_recording">Recording is on</string>
+    <string name="diag_status_idle">Recording is off</string>
+    <string name="diag_car_connected">Car service connected</string>
+    <string name="diag_car_connecting">Connecting to the car service…</string>
+    <string name="diag_car_missing">No car API in this firmware</string>
+</resources>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Deutsche Übersetzung. Standardsprache ist Englisch (values/strings.xml). -->
+<resources>
+    <!-- Имя под значком в лаунчере. -->
+    <string name="app_label">Fahrzeugdiagnose</string>
+
+    <!-- Allgemein -->
+    <string name="back">←  Zurück</string>
+    <string name="refresh">Aktualisieren</string>
+    <string name="save_where_title">Wohin soll die Kopie?</string>
+    <string name="save_here">Hier speichern</string>
+    <string name="saved">Gespeichert: %1$s</string>
+    <string name="save_failed">%1$s konnte nicht gespeichert werden</string>
+
+    <!-- Einheiten und Speicher -->
+    <string name="size_b">%1$d B</string>
+    <string name="size_kb">%1$.1f KB</string>
+    <string name="size_mb">%1$.1f MB</string>
+    <string name="storage_internal">Speicher</string>
+    <string name="storage_usb">USB %1$s</string>
+
+    <!-- Ordnerauswahl -->
+    <string name="picker_storages">Speicherorte</string>
+    <string name="picker_choose_folder">Diesen Ordner wählen</string>
+    <string name="picker_save_copy">Kopie speichern</string>
+    <string name="picker_storage_gone">Speicher %1$s wurde entfernt</string>
+    <string name="picker_no_usb">Kein USB-Stick gefunden. Stecken Sie einen ein und tippen Sie auf „Aktualisieren“.</string>
+    <string name="picker_folder_unavailable">Ordner nicht zugänglich</string>
+    <string name="picker_no_folders">Hier gibt es keine Unterordner</string>
+    <string name="picker_save_into">Die Kopie wird im Ordner „%1$s“ gespeichert.</string>
+    <string name="picker_not_writable">In diesen Ordner kann nicht geschrieben werden, wählen Sie einen anderen</string>
+
+    <!-- Fahrzeugdiagnose -->
+    <string name="diag_title">Fahrzeugdiagnose</string>
+    <string name="diag_notification">Fahrzeugereignisse werden für die Diagnose aufgezeichnet</string>
+    <string name="diag_hint">Nur Lesen: Ins Fahrzeug wird nichts geschrieben. Aufzeichnung starten, vor jeder Aktion „Markierung“ drücken (Zündung aus, Tür öffnen, Telefon verbinden), dann die Dateien auf einen USB-Stick speichern.</string>
+    <string name="diag_record_start">Aufzeichnung starten</string>
+    <string name="diag_record_stop">Aufzeichnung beenden</string>
+    <string name="diag_mark">Markierung im Protokoll</string>
+    <string name="diag_marked">Markierung %1$d hinzugefügt</string>
+    <string name="diag_snapshot">Fahrzeugzustand erfassen</string>
+    <string name="diag_snapshot_busy">Fahrzeugzustand wird erfasst…</string>
+    <string name="diag_snapshot_done">Zustand gespeichert: %1$s</string>
+    <string name="diag_error">Fehler: %1$s</string>
+    <string name="diag_save">Dateien speichern unter…</string>
+    <string name="diag_clear">Protokoll leeren</string>
+    <string name="diag_files">Dateien: %1$d, %2$s</string>
+    <string name="diag_log_empty">Das Protokoll ist leer. Aufzeichnung starten oder Zustand erfassen.</string>
+    <string name="diag_status_recording">Aufzeichnung läuft</string>
+    <string name="diag_status_idle">Aufzeichnung aus</string>
+    <string name="diag_car_connected">Fahrzeugdienst verbunden</string>
+    <string name="diag_car_connecting">Verbindung zum Fahrzeugdienst…</string>
+    <string name="diag_car_missing">Diese Firmware hat keine Fahrzeug-API</string>
+</resources>

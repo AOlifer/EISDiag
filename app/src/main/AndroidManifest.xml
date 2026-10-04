@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    android:sharedUserId="android.uid.system">
+    <!-- Доступ к памяти и флешке даёт system uid; разрешения объявлены явно на случай другой прошивки. -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- Запись продолжается после перезагрузки и сна машины (WakeReceiver). -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Фоновая запись (CarDiagService), имя телефона по Bluetooth, броадкаст лаунчера о запуске. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="com.bw.permission.RECV.LAUNCHER_BOOT_COMPLETED" />
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_label"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.EISDiag">
+        <!-- API машины (bw.car.*) из прошивки: /system/framework/BwCarProxy.jar. Без неё
+             (эмулятор, другая прошивка) приложение запускается и пишет, что API нет. -->
+        <uses-library
+            android:name="bw.car.proxy"
+            android:required="false" />
+        <activity
+            android:name=".DiagnosticsActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".PickerActivity"
+            android:exported="false" />
+        <service
+            android:name=".CarDiagService"
+            android:exported="false" />
+        <!-- Загрузка и каждое пробуждение машины после сна: продолжение записи. -->
+        <receiver
+            android:name=".WakeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="com.bw.intent.action.BOOT_COMPLETED" />
+                <action android:name="com.bw.intent.action.WAKEUP" />
+                <action android:name="com.bw.action.LAUNCHER_BOOT_COMPLETED" />
+                <action android:name="autochips.intent.action.QB_POWERON" />
+                <action android:name="autochips.intent.action.PREQB_POWERON" />
+                <action android:name="android.intent.action.ACTION_BOOT_IPO" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>
