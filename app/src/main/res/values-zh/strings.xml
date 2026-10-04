@@ -5,6 +5,8 @@
 
     <!-- Common -->
     <string name="back">←  返回</string>
+    <string name="cancel">取消</string>
+    <string name="got_it">知道了</string>
     <string name="refresh">刷新</string>
     <string name="save_where_title">副本保存位置</string>
     <string name="save_here">保存到这里</string>
@@ -32,7 +34,7 @@
     <!-- 车辆诊断 -->
     <string name="diag_title">车辆诊断</string>
     <string name="diag_notification">正在记录车辆事件用于诊断</string>
-    <string name="diag_hint">只读：不会向车辆写入任何内容。开始记录，在每个操作前按“标记”（关闭点火、打开车门、连接手机），然后把文件保存到U盘。</string>
+    <string name="diag_hint">只读：不会向车辆写入任何内容。开始记录，在每个操作前（关闭点火、打开车门、连接手机）按顶部的小旗（“标记”），然后用软盘图标把文件保存到U盘。</string>
     <string name="diag_record_start">开始记录事件</string>
     <string name="diag_record_stop">停止记录</string>
     <string name="diag_mark">在日志中标记</string>
@@ -43,6 +45,8 @@
     <string name="diag_error">错误：%1$s</string>
     <string name="diag_save">保存文件到…</string>
     <string name="diag_clear">清空日志</string>
+    <string name="diag_clear_confirm">删除日志中的所有记录？快照会保留。</string>
+    <string name="diag_clear_yes">清空</string>
     <string name="diag_files">文件：%1$d，%2$s</string>
     <string name="diag_log_empty">日志为空。请开始记录或获取快照。</string>
     <string name="diag_status_recording">正在记录</string>
@@ -50,4 +54,13 @@
     <string name="diag_car_connected">已连接车辆服务</string>
     <string name="diag_car_connecting">正在连接车辆服务…</string>
     <string name="diag_car_missing">此固件没有车辆接口</string>
+
+    <!-- Help -->
+    <string name="help">帮助</string>
+    <string name="help_text">“车辆诊断”显示 Evolute i-Space 主机上哪些车辆数据和事件可供应用使用。只读：不会向车辆写入任何内容。\n\n开始记录事件  在后台记录车辆属性变化、电源和休眠状态、广播、Settings 键和系统属性。开始时立即获取快照；重启和休眠后继续记录，直到您停止。\n\n顶部按钮（长按显示名称）：\n⚑  在日志中标记：在操作前标记时刻，例如“现在打开车门”。\n📷  获取车辆快照：车辆服务的所有属性及当前值、Settings 键、系统属性。\n💾  把日志和快照保存到U盘或内部存储。\n🗑  清空日志（快照保留）。\n\n令牌、号码、地址、标识符和 VIN 不会写入文件。分享文件前仍请检查其内容。</string>
+    <string name="help_version">版本 %1$s</string>
+    <string name="help_developer">开发者：AOlifer · Telegram：@oaaspb\ngithub.com/AOlifer/EISDiag\n许可证 PolyForm Noncommercial：仅限非商业用途</string>
+    <string name="help_disclaimer_short">⚠ 非官方应用，使用风险自负。</string>
+    <string name="disclaimer_title">免责声明</string>
+    <string name="disclaimer_text">EISDiag 是非官方应用。它与 Evolute 汽车制造商、其经销商及主机供应商无关，也未获得其认可或支持。\n\n本应用以系统权限运行，读取车辆和主机的数据；不会向车辆或原厂软件写入任何内容。\n\n本软件按“原样”提供，不附带任何形式的保证。安装和使用的风险由您自行承担。作者不对任何损害负责，包括主机或车辆其他系统故障、数据或设置丢失、需要重置或重新刷写主机、被拒绝保修，以及驾驶车辆时产生的任何后果。\n\n固件更新或制造商服务器可能导致本应用无法工作，或使其收集的数据不完整或不准确。\n\n诊断文件可能包含车辆和已连接设备的信息。分享前请先检查。\n\n请勿在行驶中使用本应用，仅在车辆停止时使用。</string>
 </resources>

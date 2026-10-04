@@ -1,12 +1,14 @@
 package com.EISDiag;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -14,13 +16,16 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
  * Диагностика машины — главный экран приложения.
  * Снимок свойств машины, запись событий в фоне ({@link CarDiagService}), отметки в журнале
  * и сохранение файлов на флешку. В машину ничего не пишет.
+ * Действия с журналом — значки на верхней панели, запись — на панели справа.
  */
 public class DiagnosticsActivity extends Activity {
     private static final int REQUEST_SAVE = 1;
@@ -30,7 +35,8 @@ public class DiagnosticsActivity extends Activity {
     private SharedPreferences prefs;
     private TextView status, log, files;
     private ScrollView scroll;
-    private Button btnRecord, btnSnapshot, btnSave, btnClear;
+    private Button btnRecord;
+    private View btnSnapshot, btnSave, btnClear;
 
     private final Handler ui = new Handler(Looper.getMainLooper());
     private HandlerThread thread;
@@ -59,13 +65,15 @@ public class DiagnosticsActivity extends Activity {
         findViewById(R.id.btnMark).setOnClickListener(v -> mark());
         btnSnapshot.setOnClickListener(v -> snapshot());
         btnSave.setOnClickListener(v -> openSaveFolderPicker());
-        btnClear.setOnClickListener(v -> clearLog());
+        btnClear.setOnClickListener(v -> confirmClearLog());
+        findViewById(R.id.btnHelp).setOnClickListener(v -> showHelp());
 
         thread = new HandlerThread("eisdiag-ui");
         thread.start();
         io = new Handler(thread.getLooper());
         io.post(this::connectCar);
         updateUi();
+        if (b == null && !prefs.getBoolean(Prefs.DISCLAIMER_SHOWN, false)) showDisclaimer(true);
     }
 
     @Override protected void onResume() {
@@ -164,19 +172,10 @@ public class DiagnosticsActivity extends Activity {
         if (requestCode != REQUEST_SAVE || resultCode != Activity.RESULT_OK || data == null) return;
         String folder = data.getStringExtra(PickerActivity.EXTRA_FOLDER);
         if (folder == null) return;
-        File dst = new File(folder, folderName());
+        String name = folderName();
         setBusy(true);
         io.post(() -> {
-            int ok = 0, failed = 0;
-            //noinspection ResultOfMethodCallIgnored
-            dst.mkdirs();
-            for (File f : CarDiag.files(this)) {
-                if (FileUtils.copyFileQuiet(f, new File(dst, f.getName()))) ok++;
-                else failed++;
-            }
-            final String msg = failed == 0 && ok > 0
-                    ? getString(R.string.saved, dst.getAbsolutePath())
-                    : getString(R.string.save_failed, dst.getAbsolutePath());
+            String msg = saveFiles(new File(folder), name);
             ui.post(() -> {
                 if (destroyed) return;
                 setBusy(false);
@@ -185,10 +184,88 @@ public class DiagnosticsActivity extends Activity {
         });
     }
 
+    /**
+     * Копирует журнал и снимки в подпапку name выбранной папки. Если на флешке не создаётся
+     * подпапка или не пишутся файлы через /storage, пробует /mnt/media_rw, затем саму папку.
+     * @return текст для пользователя: куда сохранено или почему не получилось.
+     */
+    private String saveFiles(File folder, String name) {
+        File[] src = CarDiag.files(this);
+        List<File> targets = new ArrayList<>();
+        targets.add(new File(folder, name));
+        File rw = FileUtils.mediaRwPath(folder);
+        if (rw != null) targets.add(new File(rw, name));
+        targets.add(folder);
+        String error = getString(R.string.diag_log_empty);
+        for (File dst : targets) {
+            //noinspection ResultOfMethodCallIgnored
+            dst.mkdirs();
+            if (!dst.isDirectory()) {
+                error = "mkdir " + dst.getAbsolutePath();
+                continue;
+            }
+            int ok = 0;
+            String failed = null;
+            for (File f : src) {
+                if (!f.isFile()) continue;
+                // В саму выбранную папку — с префиксом, чтобы не смешивать с чужими файлами.
+                String n = dst.equals(folder) ? name + "-" + f.getName() : f.getName();
+                failed = FileUtils.copyForExport(f, new File(dst, n));
+                if (failed != null) break;
+                ok++;
+            }
+            if (failed == null && ok > 0) return getString(R.string.saved, dst.getAbsolutePath());
+            if (failed != null) error = failed;
+        }
+        return getString(R.string.save_failed, new File(folder, name).getAbsolutePath()) + "\n" + error;
+    }
+
+    /** Значок корзины легко задеть, поэтому журнал очищается только после подтверждения. */
+    private void confirmClearLog() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.diag_clear)
+                .setMessage(R.string.diag_clear_confirm)
+                .setPositiveButton(R.string.diag_clear_yes, (d, w) -> clearLog())
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
     private void clearLog() {
         CarDiag.clearLog(this);
         if (recording()) CarDiag.log(this, "=== log cleared");
         refresh();
+    }
+
+    // ---------------------------------------------------------------- Помощь
+
+    /** Описание программы, версия, разработчик и лицензия; оттуда же — отказ от ответственности. */
+    private void showHelp() {
+        String version = "";
+        try {
+            version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        } catch (Exception ignored) {
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.diag_title)
+                .setMessage(getString(R.string.help_text) + "\n\n" + getString(R.string.help_version, version)
+                        + "\n" + getString(R.string.help_developer) + "\n\n" + getString(R.string.help_disclaimer_short))
+                .setPositiveButton(R.string.got_it, null)
+                .setNeutralButton(R.string.disclaimer_title, (d, w) -> showDisclaimer(false))
+                .show();
+    }
+
+    /**
+     * Отказ от ответственности (полный текст — DISCLAIMER.md в репозитории).
+     * @param firstRun показывается сам при первом запуске; после «Понятно» больше не появляется.
+     */
+    private void showDisclaimer(boolean firstRun) {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.disclaimer_title)
+                .setMessage(R.string.disclaimer_text)
+                .setCancelable(!firstRun)
+                .setPositiveButton(R.string.got_it, (d, w) ->
+                        prefs.edit().putBoolean(Prefs.DISCLAIMER_SHOWN, true).apply())
+                .show();
     }
 
     // ---------------------------------------------------------------- Экран

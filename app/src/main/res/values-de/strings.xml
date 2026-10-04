@@ -6,6 +6,8 @@
 
     <!-- Allgemein -->
     <string name="back">←  Zurück</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="got_it">Verstanden</string>
     <string name="refresh">Aktualisieren</string>
     <string name="save_where_title">Wohin soll die Kopie?</string>
     <string name="save_here">Hier speichern</string>
@@ -33,7 +35,7 @@
     <!-- Fahrzeugdiagnose -->
     <string name="diag_title">Fahrzeugdiagnose</string>
     <string name="diag_notification">Fahrzeugereignisse werden für die Diagnose aufgezeichnet</string>
-    <string name="diag_hint">Nur Lesen: Ins Fahrzeug wird nichts geschrieben. Aufzeichnung starten, vor jeder Aktion „Markierung“ drücken (Zündung aus, Tür öffnen, Telefon verbinden), dann die Dateien auf einen USB-Stick speichern.</string>
+    <string name="diag_hint">Nur Lesen: Ins Fahrzeug wird nichts geschrieben. Aufzeichnung starten, vor jeder Aktion (Zündung aus, Tür öffnen, Telefon verbinden) oben die Fahne („Markierung“) drücken, dann die Dateien mit dem Diskettensymbol auf einen USB-Stick speichern.</string>
     <string name="diag_record_start">Aufzeichnung starten</string>
     <string name="diag_record_stop">Aufzeichnung beenden</string>
     <string name="diag_mark">Markierung im Protokoll</string>
@@ -44,6 +46,8 @@
     <string name="diag_error">Fehler: %1$s</string>
     <string name="diag_save">Dateien speichern unter…</string>
     <string name="diag_clear">Protokoll leeren</string>
+    <string name="diag_clear_confirm">Alle Protokolleinträge löschen? Die Zustandsaufnahmen bleiben erhalten.</string>
+    <string name="diag_clear_yes">Leeren</string>
     <string name="diag_files">Dateien: %1$d, %2$s</string>
     <string name="diag_log_empty">Das Protokoll ist leer. Aufzeichnung starten oder Zustand erfassen.</string>
     <string name="diag_status_recording">Aufzeichnung läuft</string>
@@ -51,4 +55,13 @@
     <string name="diag_car_connected">Fahrzeugdienst verbunden</string>
     <string name="diag_car_connecting">Verbindung zum Fahrzeugdienst…</string>
     <string name="diag_car_missing">Diese Firmware hat keine Fahrzeug-API</string>
+
+    <!-- Help -->
+    <string name="help">Hilfe</string>
+    <string name="help_text">„Fahrzeugdiagnose“ zeigt, welche Fahrzeugdaten und -ereignisse Apps auf dem Evolute i-Space Infotainmentsystem zur Verfügung stehen. Nur Lesen: Ins Fahrzeug wird nichts geschrieben.\n\nAufzeichnung starten  Hintergrundaufzeichnung von Änderungen der Fahrzeugeigenschaften, Strom- und Ruhezuständen, Broadcasts, Settings-Schlüsseln und Systemeigenschaften. Beim Start wird sofort der Zustand erfasst; die Aufzeichnung läuft nach Neustart und Ruhezustand weiter, bis Sie sie beenden.\n\nSchaltflächen oben (langes Drücken zeigt den Namen):\n⚑  Markierung im Protokoll: einen Moment vor einer Aktion markieren, z. B. „jetzt Tür geöffnet“.\n📷  Fahrzeugzustand erfassen: alle Eigenschaften des Fahrzeugdienstes mit aktuellen Werten, Settings-Schlüssel, Systemeigenschaften.\n💾  Protokoll und Zustandsaufnahmen auf einen USB-Stick oder in den internen Speicher speichern.\n🗑  Protokoll leeren (Zustandsaufnahmen bleiben erhalten).\n\nToken, Nummern, Adressen, Kennungen und die FIN werden nicht in die Dateien geschrieben. Prüfen Sie die Dateien trotzdem, bevor Sie sie weitergeben.</string>
+    <string name="help_version">Version %1$s</string>
+    <string name="help_developer">Entwickler: AOlifer · Telegram: @oaaspb\ngithub.com/AOlifer/EISDiag\nLizenz PolyForm Noncommercial: nur nicht-kommerzielle Nutzung</string>
+    <string name="help_disclaimer_short">⚠ Inoffizielle App, Nutzung auf eigenes Risiko.</string>
+    <string name="disclaimer_title">Haftungsausschluss</string>
+    <string name="disclaimer_text">EISDiag ist eine inoffizielle Anwendung. Sie steht in keiner Verbindung zum Fahrzeughersteller Evolute, seinen Händlern oder den Lieferanten des Infotainmentsystems und wird von ihnen weder unterstützt noch gebilligt.\n\nDie Anwendung läuft mit Systemrechten und liest Daten des Fahrzeugs und des Infotainmentsystems; sie schreibt nichts ins Fahrzeug oder in die Serien-Software.\n\nDie Software wird „wie besehen“ ohne jegliche Gewährleistung bereitgestellt. Installation und Nutzung erfolgen auf eigenes Risiko. Der Autor haftet nicht für Schäden jeglicher Art, einschließlich Fehlfunktionen des Infotainmentsystems oder anderer Fahrzeugsysteme, Verlust von Daten oder Einstellungen, notwendiger Zurücksetzung oder Neuinstallation der Firmware, verweigerter Garantieleistungen und jeglicher Folgen während des Fahrzeugbetriebs.\n\nFirmware-Updates oder der Server des Herstellers können die Anwendung funktionsunfähig oder die gesammelten Daten unvollständig oder ungenau machen.\n\nDiagnosedateien können Angaben zum Fahrzeug und zu verbundenen Geräten enthalten. Prüfen Sie sie, bevor Sie sie weitergeben.\n\nNutzen Sie die Anwendung nicht während der Fahrt – nur bei stehendem Fahrzeug.</string>
 </resources>

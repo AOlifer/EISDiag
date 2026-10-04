@@ -14,6 +14,9 @@ final class Prefs {
     /** Идёт запись событий ({@link CarDiagService}); после перезагрузки и сна машины запись продолжается. */
     static final String DIAG_RECORDING = "diag_recording";
 
+    /** Отказ от ответственности уже показан при первом запуске и принят. */
+    static final String DISCLAIMER_SHOWN = "disclaimer_shown";
+
     private Prefs() {}
 
     static SharedPreferences get(Context c) {

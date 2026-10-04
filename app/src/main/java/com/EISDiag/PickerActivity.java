@@ -220,7 +220,7 @@ public class PickerActivity extends Activity {
     }
 
     private void finishWithResult() {
-        if (!dir.canWrite()) { toast(getString(R.string.picker_not_writable)); return; }
+        if (!FileUtils.canWrite(dir)) { toast(getString(R.string.picker_not_writable)); return; }
         setResult(RESULT_OK, new Intent().putExtra(EXTRA_FOLDER, dir.getAbsolutePath()));
         finish();
     }

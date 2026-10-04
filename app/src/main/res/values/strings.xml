@@ -9,6 +9,8 @@
 
     <!-- Common -->
     <string name="back">←  Back</string>
+    <string name="cancel">Cancel</string>
+    <string name="got_it">Got it</string>
     <string name="refresh">Refresh</string>
     <string name="save_where_title">Where to save the copy</string>
     <string name="save_here">Save here</string>
@@ -36,7 +38,7 @@
     <!-- Car diagnostics -->
     <string name="diag_title">Car diagnostics</string>
     <string name="diag_notification">Recording car events for diagnostics</string>
-    <string name="diag_hint">Read only: nothing is written to the car. Start recording, press “Mark” before each action (switch the ignition off, open a door, connect the phone), then save the files to a USB drive.</string>
+    <string name="diag_hint">Read only: nothing is written to the car. Start recording, tap the flag at the top (“Mark”) before each action (switch the ignition off, open a door, connect the phone), then save the files to a USB drive with the floppy icon.</string>
     <string name="diag_record_start">Start recording events</string>
     <string name="diag_record_stop">Stop recording</string>
     <string name="diag_mark">Mark in the log</string>
@@ -47,6 +49,8 @@
     <string name="diag_error">Error: %1$s</string>
     <string name="diag_save">Save files to…</string>
     <string name="diag_clear">Clear the log</string>
+    <string name="diag_clear_confirm">Delete all log entries? Snapshots are kept.</string>
+    <string name="diag_clear_yes">Clear</string>
     <string name="diag_files">Files: %1$d, %2$s</string>
     <string name="diag_log_empty">The log is empty. Start recording or take a snapshot.</string>
     <string name="diag_status_recording">Recording is on</string>
@@ -54,4 +58,13 @@
     <string name="diag_car_connected">Car service connected</string>
     <string name="diag_car_connecting">Connecting to the car service…</string>
     <string name="diag_car_missing">No car API in this firmware</string>
+
+    <!-- Help and disclaimer -->
+    <string name="help">Help</string>
+    <string name="help_text">Car Diagnostics shows which car data and events are available to apps on the Evolute i-Space head unit. Read only: nothing is written to the car.\n\nStart recording  background recording of car property changes, power and sleep states, broadcasts, Settings keys and system properties. A snapshot is taken right away; recording continues after a reboot and sleep until you stop it.\n\nButtons at the top (long-press shows the name):\n⚑  Mark in the log: mark a moment before an action, e.g. “opening the door now”.\n📷  Take a snapshot of the car: all properties of the car service with their current values, Settings keys, system properties.\n💾  Save the log and snapshots to a USB drive or internal memory.\n🗑  Clear the log (snapshots are kept).\n\nTokens, numbers, addresses, identifiers and the VIN are not written to the files. Still, review the files before sharing them.</string>
+    <string name="help_version">Version %1$s</string>
+    <string name="help_developer">Developer: AOlifer · Telegram: @oaaspb\ngithub.com/AOlifer/EISDiag\nLicense PolyForm Noncommercial: non-commercial use only</string>
+    <string name="help_disclaimer_short">⚠ Unofficial app, use at your own risk.</string>
+    <string name="disclaimer_title">Disclaimer</string>
+    <string name="disclaimer_text">EISDiag is an unofficial application. It is not affiliated with, endorsed or supported by the Evolute car manufacturer, its dealers or the head unit suppliers.\n\nThe application runs with system privileges and reads data of the car and the head unit; it writes nothing to the car or the stock software.\n\nThe software is provided “as is”, without warranty of any kind. You install and use it at your own risk. The author is not liable for any damage, including malfunction of the head unit or other vehicle systems, loss of data or settings, the need to reset or reflash the unit, refusal of warranty service, and any consequences while operating the vehicle.\n\nFirmware updates or the manufacturer’s server may make the application stop working, or make the data it collects incomplete or inaccurate.\n\nDiagnostic files may contain information about the car and connected devices. Review them before sharing.\n\nDo not use the application while driving, only while the vehicle is stationary.</string>
 </resources>

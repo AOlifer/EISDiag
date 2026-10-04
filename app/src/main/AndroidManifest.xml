@@ -4,6 +4,8 @@
     <!-- Доступ к памяти и флешке даёт system uid; разрешения объявлены явно на случай другой прошивки. -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- Запасной путь записи на флешку через /mnt/media_rw (каталог доступен только группе media_rw). -->
+    <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
     <!-- Запись продолжается после перезагрузки и сна машины (WakeReceiver). -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Фоновая запись (CarDiagService), имя телефона по Bluetooth, броадкаст лаунчера о запуске. -->
