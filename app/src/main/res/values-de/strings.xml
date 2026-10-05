@@ -8,6 +8,7 @@
     <string name="back">←  Zurück</string>
     <string name="cancel">Abbrechen</string>
     <string name="got_it">Verstanden</string>
+    <string name="exit">Beenden</string>
     <string name="refresh">Aktualisieren</string>
     <string name="save_where_title">Wohin soll die Kopie?</string>
     <string name="save_here">Hier speichern</string>
@@ -64,6 +65,19 @@
     <string name="help_disclaimer_short">⚠ Inoffizielle App, Nutzung auf eigenes Risiko.</string>
     <string name="disclaimer_title">Haftungsausschluss</string>
     <string name="disclaimer_text">EISDiag ist eine inoffizielle Anwendung. Sie steht in keiner Verbindung zum Fahrzeughersteller Evolute, seinen Händlern oder den Lieferanten des Infotainmentsystems und wird von ihnen weder unterstützt noch gebilligt.\n\nDie Anwendung läuft mit Systemrechten und liest Daten des Fahrzeugs und des Infotainmentsystems; sie schreibt nichts ins Fahrzeug oder in die Serien-Software.\n\nDie Software wird „wie besehen“ ohne jegliche Gewährleistung bereitgestellt. Installation und Nutzung erfolgen auf eigenes Risiko. Der Autor haftet nicht für Schäden jeglicher Art, einschließlich Fehlfunktionen des Infotainmentsystems oder anderer Fahrzeugsysteme, Verlust von Daten oder Einstellungen, notwendiger Zurücksetzung oder Neuinstallation der Firmware, verweigerter Garantieleistungen und jeglicher Folgen während des Fahrzeugbetriebs.\n\nFirmware-Updates oder der Server des Herstellers können die Anwendung funktionsunfähig oder die gesammelten Daten unvollständig oder ungenau machen.\n\nDiagnosedateien können Angaben zum Fahrzeug und zu verbundenen Geräten enthalten. Prüfen Sie sie, bevor Sie sie weitergeben.\n\nNutzen Sie die Anwendung nicht während der Fahrt – nur bei stehendem Fahrzeug.</string>
+    <!-- Design und Beenden -->
+    <string name="theme_desc">Design: %1$s</string>
+    <string name="theme_toast">Design: %1$s</string>
+    <string-array name="theme_names">
+        <item>auto</item>
+        <item>hell</item>
+        <item>dunkel</item>
+    </string-array>
+    <string name="exit_busy_title">Speichern läuft</string>
+    <string name="exit_busy_message">Der Zustand wird erfasst oder Dateien werden gespeichert. Wenn Sie jetzt beenden, wird das im Hintergrund abgeschlossen, aber Sie sehen nicht, ob alles geklappt hat. Die Aufzeichnung läuft nach dem Beenden weiter.</string>
+    <string name="exit_wait">Warten</string>
+    <string name="exit_now">Jetzt beenden</string>
+
 
     <!-- Updates (Updater) -->
     <string name="update_check">Nach Updates suchen</string>

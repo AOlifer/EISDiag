@@ -11,6 +11,7 @@
     <string name="back">←  Back</string>
     <string name="cancel">Cancel</string>
     <string name="got_it">Got it</string>
+    <string name="exit">Exit</string>
     <string name="refresh">Refresh</string>
     <string name="save_where_title">Where to save the copy</string>
     <string name="save_here">Save here</string>
@@ -67,6 +68,19 @@
     <string name="help_disclaimer_short">⚠ Unofficial app, use at your own risk.</string>
     <string name="disclaimer_title">Disclaimer</string>
     <string name="disclaimer_text">EISDiag is an unofficial application. It is not affiliated with, endorsed or supported by the Evolute car manufacturer, its dealers or the head unit suppliers.\n\nThe application runs with system privileges and reads data of the car and the head unit; it writes nothing to the car or the stock software.\n\nThe software is provided “as is”, without warranty of any kind. You install and use it at your own risk. The author is not liable for any damage, including malfunction of the head unit or other vehicle systems, loss of data or settings, the need to reset or reflash the unit, refusal of warranty service, and any consequences while operating the vehicle.\n\nFirmware updates or the manufacturer’s server may make the application stop working, or make the data it collects incomplete or inaccurate.\n\nDiagnostic files may contain information about the car and connected devices. Review them before sharing.\n\nDo not use the application while driving, only while the vehicle is stationary.</string>
+    <!-- Theme and exit -->
+    <string name="theme_desc">Theme: %1$s</string>
+    <string name="theme_toast">Theme: %1$s</string>
+    <string-array name="theme_names">
+        <item>auto</item>
+        <item>light</item>
+        <item>dark</item>
+    </string-array>
+    <string name="exit_busy_title">Saving in progress</string>
+    <string name="exit_busy_message">A snapshot is being taken or files are being saved. If you exit now, this will finish in the background, but you will not see whether it succeeded. Event recording continues after exit.</string>
+    <string name="exit_wait">Wait</string>
+    <string name="exit_now">Exit now</string>
+
 
     <!-- Updates (Updater) -->
     <string name="update_check">Check for updates</string>

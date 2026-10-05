@@ -30,7 +30,7 @@ import java.util.Locale;
  * и сохранение файлов на флешку. В машину ничего не пишет.
  * Действия с журналом — значки на верхней панели, запись — на панели справа.
  */
-public class DiagnosticsActivity extends Activity {
+public class DiagnosticsActivity extends BaseActivity {
     private static final int REQUEST_SAVE = 1;
     private static final long REFRESH_MS = 2000;
     private static final int TAIL_BYTES = 48 * 1024;
@@ -71,6 +71,12 @@ public class DiagnosticsActivity extends Activity {
         btnSave.setOnClickListener(v -> openSaveFolderPicker());
         btnClear.setOnClickListener(v -> confirmClearLog());
         findViewById(R.id.btnHelp).setOnClickListener(v -> showHelp());
+        findViewById(R.id.btnExit).setOnClickListener(v -> exitApp());
+        View btnTheme = findViewById(R.id.btnTheme);
+        String theme = getString(R.string.theme_desc, themeName(themeMode(this)));
+        btnTheme.setContentDescription(theme);
+        btnTheme.setTooltipText(theme);
+        btnTheme.setOnClickListener(v -> switchTheme());
 
         thread = new HandlerThread("eisdiag-ui");
         thread.start();
@@ -340,6 +346,38 @@ public class DiagnosticsActivity extends Activity {
         btnSave.setEnabled(!busy && all.length > 0);
         btnClear.setEnabled(!busy);
         btnSnapshot.setEnabled(!busy);
+    }
+
+    // ---------------------------------------------------------------- Тема и выход
+
+    /** Авто → светлая → тёмная → авто; экран пересоздаётся с новой темой. */
+    private void switchTheme() {
+        int next = (themeMode(this) + 1) % THEME_COUNT;
+        prefs.edit().putInt(Prefs.THEME, next).apply();
+        toast(getString(R.string.theme_toast, themeName(next)));
+        recreate();
+    }
+
+    /** Системная «Назад» на главном экране работает так же, как кнопка «Выход». */
+    @Override public void onBackPressed() {
+        exitApp();
+    }
+
+    /**
+     * Закрыть приложение и убрать его из недавних; запись событий в фоне продолжается.
+     * Пока делается снимок или сохраняются файлы, сначала спросить.
+     */
+    private void exitApp() {
+        if (!busy) {
+            finishAndRemoveTask();
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.exit_busy_title)
+                .setMessage(R.string.exit_busy_message)
+                .setPositiveButton(R.string.exit_wait, null)
+                .setNegativeButton(R.string.exit_now, (d, w) -> finishAndRemoveTask())
+                .show();
     }
 
     private void setBusy(boolean value) {

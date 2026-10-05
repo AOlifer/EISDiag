@@ -25,7 +25,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * Выбор папки в памяти устройства и на внешних накопителях — куда сохранить файлы диагностики.
  * Три колонки: накопители слева, подпапки по центру, что будет сохранено и кнопка действия справа.
  */
-public class PickerActivity extends Activity {
+public class PickerActivity extends BaseActivity {
     static final String EXTRA_TITLE = "title";
     /** Подпись основной кнопки. */
     static final String EXTRA_ACTION = "action";

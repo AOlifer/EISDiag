@@ -60,12 +60,23 @@
             android:layout_marginEnd="4dp"
             android:background="@color/divider" />
 
+        <!-- Тема: авто → светлая → тёмная; подпись с текущей темой задаётся из кода. -->
+        <ImageButton
+            android:id="@+id/btnTheme"
+            style="@style/EISDiag.TopIcon"
+            android:src="@drawable/ic_theme" />
+
         <ImageButton
             android:id="@+id/btnHelp"
             style="@style/EISDiag.TopIcon"
             android:contentDescription="@string/help"
             android:src="@drawable/ic_help"
             android:tooltipText="@string/help" />
+
+        <Button
+            android:id="@+id/btnExit"
+            style="@style/EISDiag.TextButton"
+            android:text="@string/exit" />
     </LinearLayout>
 
     <View style="@style/EISDiag.Divider" />
