@@ -60,7 +60,7 @@ android {
         applicationId 'com.EISDiag'
         minSdk 28
         targetSdk 28
-        versionCode 7
+        versionCode 8
         versionName '0.1'
     }
 
@@ -81,8 +81,13 @@ android {
         debug {
             signingConfig null
         }
+        // R8 убирает неиспользуемый код, shrinkResources — неиспользуемые ресурсы.
+        // Классы bw.car.* вызываются через reflection, но они из прошивки, а не из APK,
+        // поэтому особых правил keep не нужно (см. proguard-rules.pro).
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig null
         }
     }
