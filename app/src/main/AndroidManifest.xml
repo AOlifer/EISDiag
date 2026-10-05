@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:sharedUserId="android.uid.system">
     <!-- Доступ к памяти и флешке даёт system uid; разрешения объявлены явно на случай другой прошивки. -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- Запасной путь записи на флешку через /mnt/media_rw (каталог доступен только группе media_rw). -->
+    <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
     <!-- Запись продолжается после перезагрузки и сна машины (WakeReceiver). -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Фоновая запись (CarDiagService), имя телефона по Bluetooth, броадкаст лаунчера о запуске. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="com.bw.permission.RECV.LAUNCHER_BOOT_COMPLETED" />
+    <!-- Проверка и установка обновлений с сервера (Updater); INSTALL_PACKAGES даёт system uid. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission
+        android:name="android.permission.INSTALL_PACKAGES"
+        tools:ignore="ProtectedPermissions" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -47,6 +55,16 @@
                 <action android:name="autochips.intent.action.QB_POWERON" />
                 <action android:name="autochips.intent.action.PREQB_POWERON" />
                 <action android:name="android.intent.action.ACTION_BOOT_IPO" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".Updater$ResultReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".Updater$ReplacedReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
     </application>

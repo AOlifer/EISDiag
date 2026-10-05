@@ -51,14 +51,25 @@ final class CarApi {
         this.context = context.getApplicationContext();
     }
 
-    /** Есть ли в прошивке библиотека bw.car.proxy. */
+    /** Результат {@link #isAvailable()}: библиотека прошивки за время работы процесса не меняется. */
+    private static volatile Boolean available;
+
+    /**
+     * Есть ли в прошивке библиотека bw.car.proxy. Экран спрашивает об этом каждые 2 с, поэтому
+     * ответ запоминается: без библиотеки (эмулятор) каждый вызов создавал бы исключение.
+     */
     static boolean isAvailable() {
-        try {
-            Class.forName(CAR);
-            return true;
-        } catch (Throwable e) {
-            return false;
+        Boolean a = available;
+        if (a == null) {
+            try {
+                Class.forName(CAR);
+                a = true;
+            } catch (Throwable e) {
+                a = false;
+            }
+            available = a;
         }
+        return a;
     }
 
     /**
@@ -202,9 +213,14 @@ final class CarApi {
         try {
             return String.valueOf(m.getClass().getMethod(method).invoke(m));
         } catch (Throwable e) {
-            Throwable cause = e.getCause() != null ? e.getCause() : e;
-            return "error: " + cause.getClass().getSimpleName();
+            return "error: " + errorName(e);
         }
+    }
+
+    /** Имя класса ошибки; у ошибок reflection — исходной ошибки из вызванного метода. */
+    static String errorName(Throwable e) {
+        Throwable cause = e.getCause() != null ? e.getCause() : e;
+        return cause.getClass().getSimpleName();
     }
 
     // ---------------------------------------------------------------- Вспомогательное

@@ -32,11 +32,17 @@ final class Ui {
         return row;
     }
 
-    static TextView title(Context c, String text) {
+    /** Подпись: текст, размер в sp и цвет из ресурсов. */
+    static TextView text(Context c, CharSequence text, float sizeSp, int colorRes) {
         TextView v = new TextView(c);
         v.setText(text);
-        v.setTextSize(19);
-        v.setTextColor(c.getColor(R.color.text_primary));
+        v.setTextSize(sizeSp);
+        v.setTextColor(c.getColor(colorRes));
+        return v;
+    }
+
+    static TextView title(Context c, String text) {
+        TextView v = text(c, text, 19, R.color.text_primary);
         v.setSingleLine(true);
         v.setEllipsize(TextUtils.TruncateAt.MIDDLE);
         return v;
@@ -58,18 +64,12 @@ final class Ui {
         box.setOrientation(LinearLayout.VERTICAL);
         box.setGravity(Gravity.CENTER_HORIZONTAL);
         box.setPadding(dp(c, 32), dp(c, 48), dp(c, 32), dp(c, 48));
-        TextView h = new TextView(c);
-        h.setText(headline);
-        h.setTextSize(20);
+        TextView h = text(c, headline, 20, R.color.text_primary);
         h.setTypeface(Typeface.DEFAULT_BOLD);
-        h.setTextColor(c.getColor(R.color.text_primary));
         h.setGravity(Gravity.CENTER);
         box.addView(h);
         if (details != null) {
-            TextView d = new TextView(c);
-            d.setText(details);
-            d.setTextSize(17);
-            d.setTextColor(c.getColor(R.color.text_secondary));
+            TextView d = text(c, details, 17, R.color.text_secondary);
             d.setGravity(Gravity.CENTER);
             d.setPadding(0, dp(c, 8), 0, 0);
             box.addView(d);

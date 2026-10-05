@@ -6,6 +6,9 @@
 
     <!-- Общее -->
     <string name="back">←  Назад</string>
+    <string name="cancel">Отмена</string>
+    <string name="got_it">Понятно</string>
+    <string name="exit">Выход</string>
     <string name="refresh">Обновить</string>
     <string name="save_where_title">Куда сохранить копию</string>
     <string name="save_here">Сохранить сюда</string>
@@ -33,7 +36,7 @@
     <!-- Диагностика машины -->
     <string name="diag_title">Диагностика машины</string>
     <string name="diag_notification">Идёт запись событий машины для диагностики</string>
-    <string name="diag_hint">Только чтение: в машину ничего не записывается. Включите запись, нажимайте «Отметка» перед каждым действием (выключить зажигание, открыть дверь, подключить телефон), затем сохраните файлы на флешку.</string>
+    <string name="diag_hint">Только чтение: в машину ничего не записывается. Включите запись, перед каждым действием (выключить зажигание, открыть дверь, подключить телефон) нажимайте флажок вверху («Отметка»), затем сохраните файлы на флешку значком дискеты.</string>
     <string name="diag_record_start">Начать запись событий</string>
     <string name="diag_record_stop">Остановить запись</string>
     <string name="diag_mark">Отметка в журнале</string>
@@ -44,6 +47,8 @@
     <string name="diag_error">Ошибка: %1$s</string>
     <string name="diag_save">Сохранить файлы в…</string>
     <string name="diag_clear">Очистить журнал</string>
+    <string name="diag_clear_confirm">Удалить все записи журнала? Снимки останутся.</string>
+    <string name="diag_clear_yes">Очистить</string>
     <string name="diag_files">Файлов: %1$d, %2$s</string>
     <string name="diag_log_empty">Журнал пуст. Включите запись или сделайте снимок.</string>
     <string name="diag_status_recording">Запись включена</string>
@@ -51,4 +56,49 @@
     <string name="diag_car_connected">Сервис машины подключён</string>
     <string name="diag_car_connecting">Подключение к сервису машины…</string>
     <string name="diag_car_missing">В этой прошивке нет API машины</string>
+
+    <!-- Помощь и отказ от ответственности -->
+    <string name="help">Помощь</string>
+    <string name="help_text">«Диагностика машины» показывает, какие данные и события машины доступны приложениям на головном устройстве Evolute i-Space. Только чтение: в машину ничего не записывается.\n\nНачать запись событий  фоновая запись в журнал изменений свойств машины, состояний питания и сна, броадкастов, ключей Settings и свойств системы. При включении сразу делается снимок; запись продолжается после перезагрузки и сна машины, пока её не остановить.\n\nКнопки вверху (долгое нажатие покажет название):\n⚑  Отметка в журнале: пометить момент перед действием, например «сейчас открыл дверь».\n📷  Снимок машины: все свойства сервиса машины с текущими значениями, ключи Settings, свойства системы.\n💾  Сохранить журнал и снимки на флешку или во внутреннюю память.\n🗑  Очистить журнал (снимки остаются).\n\nЗначения токенов, номеров, адресов, идентификаторов и VIN в файлы не попадают. Всё же просмотрите файлы, прежде чем передавать их другим.</string>
+    <string name="help_version">Версия %1$s</string>
+    <string name="help_developer">Разработчик: AOlifer · Telegram: @oaaspb\ngithub.com/AOlifer/EISDiag\nЛицензия PolyForm Noncommercial: только некоммерческое использование</string>
+    <string name="help_disclaimer_short">⚠ Неофициальное приложение, используется на свой риск.</string>
+    <string name="disclaimer_title">Отказ от ответственности</string>
+    <string name="disclaimer_text">EISDiag — неофициальное приложение. Оно не связано с производителем автомобиля Evolute, его дилерами и поставщиками головного устройства и не поддерживается ими.\n\nПриложение работает с системными правами и читает данные машины и головного устройства; в машину и штатное ПО оно ничего не записывает.\n\nПрограмма предоставляется «как есть», без каких-либо гарантий. Вы устанавливаете и используете её на свой риск. Автор не несёт ответственности за любой ущерб, в том числе за сбои головного устройства и других систем автомобиля, потерю данных и настроек, необходимость сброса или перепрошивки, отказ в гарантийном обслуживании и любые последствия во время эксплуатации автомобиля.\n\nОбновления прошивки или сервер производителя могут сделать приложение неработоспособным, а собранные им данные — неполными или неточными.\n\nФайлы диагностики могут содержать сведения о машине и подключённых устройствах. Просмотрите их, прежде чем передавать другим.\n\nНе пользуйтесь приложением во время движения — только на стоящем автомобиле.</string>
+    <!-- Тема и выход -->
+    <string name="theme_desc">Тема оформления: %1$s</string>
+    <string name="theme_toast">Тема: %1$s</string>
+    <string-array name="theme_names">
+        <item>авто</item>
+        <item>светлая</item>
+        <item>тёмная</item>
+    </string-array>
+    <string name="exit_busy_title">Идёт сохранение</string>
+    <string name="exit_busy_message">Делается снимок или сохраняются файлы. Если выйти сейчас, это закончится в фоне, но вы не увидите, всё ли прошло успешно. Запись событий после выхода продолжается.</string>
+    <string name="exit_wait">Дождаться</string>
+    <string name="exit_now">Выйти сейчас</string>
+
+
+    <!-- Обновления (Updater). -->
+    <string name="update_check">Проверить обновления</string>
+    <string name="update_checking">Проверяю обновления…</string>
+    <string name="update_latest">Установлена последняя версия</string>
+    <string name="update_available">Доступна версия %1$s. Подробнее…</string>
+    <string name="update_available_help">Доступна версия %1$s: откройте Помощь (?)</string>
+    <string name="update_failed">Не удалось проверить обновления. Нажмите, чтобы повторить</string>
+    <string name="update_title">Обновление до версии %1$s</string>
+    <string name="update_released">Выпущена %1$s.</string>
+    <string name="update_size">Размер загрузки: %1$s.</string>
+    <string name="update_install">Скачать и установить</string>
+    <string name="update_download">Скачать и проверить</string>
+    <string name="update_later">Позже</string>
+    <string name="update_downloading">Загрузка обновления…</string>
+    <string name="update_installing">Устанавливаю обновление. Приложение закроется и откроется снова.</string>
+    <string name="update_emulator_note">Версия для эмулятора только скачивает и проверяет обновление: APK для машины подписан другим ключом.</string>
+    <string name="update_emulator_done">APK скачан и проверен: %1$s</string>
+    <string name="update_error">Не удалось обновить: %1$s</string>
+    <string name="update_error_checksum">скачанный файл повреждён (не совпала контрольная сумма)</string>
+    <string name="update_error_package">файл не является обновлением EISDiag</string>
+    <string name="update_error_version">версия в файле не новее установленной</string>
+    <string name="update_error_install">Установка не удалась: %1$s</string>
 </resources>
