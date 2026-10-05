@@ -1,0 +1,14 @@
+{
+  "versionCode": 10,
+  "versionName": "0.1",
+  "date": "2026-10-05",
+  "apk": "https://github.com/AOlifer/EISDiag/releases/download/0.1/EISDiag-0.1.apk",
+  "size": 114795,
+  "sha256": "24924d4a2ebba6f13495b926b6768337683364e98a2b8a5107ae786d883adb18",
+  "changes": {
+    "ru": "• Первая версия: диагностика машины, выделенная из EISWM в отдельное приложение.\n• Снимок свойств машины, запись событий в фоне (продолжается после сна и перезагрузки), отметки в журнале и сохранение файлов на флешку. Только чтение.\n• Своя иконка, светлая и тёмная тема, Помощь, проверка и установка обновлений.",
+    "en": "• First version: car diagnostics split out of EISWM into a separate app.\n• Snapshot of car properties, background event recording (continues after sleep and reboot), log marks and saving files to a USB drive. Read-only.\n• Own icon, light and dark theme, Help, checking and installing updates.",
+    "de": "• Erste Version: Fahrzeugdiagnose aus EISWM als eigene App ausgegliedert.\n• Momentaufnahme der Fahrzeugeigenschaften, Ereignisaufzeichnung im Hintergrund (läuft nach Ruhezustand und Neustart weiter), Markierungen im Protokoll und Speichern auf einen USB-Stick. Nur Lesen.\n• Eigenes Symbol, helles und dunkles Design, Hilfe, Suchen und Installieren von Updates.",
+    "zh": "• 首个版本：车辆诊断从 EISWM 中拆分为独立应用。\n• 车辆属性快照、后台事件记录（休眠和重启后继续）、日志标记以及将文件保存到 U 盘。只读。\n• 独立图标、浅色和深色主题、帮助、检查并安装更新。"
+  }
+}
