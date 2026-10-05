@@ -136,12 +136,10 @@ final class UpdateController {
         ProgressBar bar = new ProgressBar(activity, null, android.R.attr.progressBarStyleHorizontal);
         bar.setIndeterminate(r.size <= 0);
         bar.setMax(1000);
-        TextView text = new TextView(activity);
-        text.setTextColor(activity.getColor(R.color.text_secondary));
-        text.setTextSize(16);
+        TextView text = Ui.text(activity, null, 16, R.color.text_secondary);
         LinearLayout box = new LinearLayout(activity);
         box.setOrientation(LinearLayout.VERTICAL);
-        int pad = Math.round(24 * activity.getResources().getDisplayMetrics().density);
+        int pad = Ui.dp(activity, 24);
         box.setPadding(pad, pad / 2, pad, 0);
         box.addView(bar);
         box.addView(text);

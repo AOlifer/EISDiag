@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 /**
  * Диагностика машины: журнал событий ({@link CarDiagService}) и снимок состояния.
@@ -39,6 +40,9 @@ final class CarDiag {
             "runtime.backcar.status", "runtime.backcar.type",
             "sys.boot_completed", "vendor.bw.foreground.package",
     };
+
+    /** Таблицы Settings: в снимке — все ключи, при записи — каждое изменение. */
+    static final String[] SETTINGS_TABLES = {"global", "system", "secure"};
 
     /** Файлы анимаций приветствия и прощания, которые показывает BwCarService. */
     static final String[] ANIMATION_FILES = {
@@ -61,6 +65,8 @@ final class CarDiag {
             "SYSTEM_FCT_SETTING_ICCID", "SYSTEM_FCT_SETTING_SERIAL_NUMBER", "SYSTEM_FCT_SETTING_TBOX_SK_DATA"));
 
     private static final Object LOCK = new Object();
+    /** Метка времени в журнале; SimpleDateFormat не потокобезопасен, используется под LOCK. */
+    private static final SimpleDateFormat LOG_TIME = new SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US);
     private static Map<Integer, String> names;
 
     private CarDiag() {}
@@ -78,11 +84,14 @@ final class CarDiag {
 
     /** Дописать строку в журнал с меткой времени. */
     static void log(Context c, String line) {
-        String stamped = new SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US).format(new Date()) + "  " + line;
         synchronized (LOCK) {
-            File f = logFile(c);
+            // Часовой пояс машина может сменить на ходу; новый объект на каждую строку раньше брал его сам.
+            LOG_TIME.setTimeZone(TimeZone.getDefault());
+            String stamped = LOG_TIME.format(new Date()) + "  " + line;
+            File d = dir(c);
+            File f = new File(d, LOG_NAME);
             if (f.length() > LOG_MAX_BYTES) {
-                File old = new File(dir(c), LOG_OLD_NAME);
+                File old = new File(d, LOG_OLD_NAME);
                 //noinspection ResultOfMethodCallIgnored
                 old.delete();
                 //noinspection ResultOfMethodCallIgnored
@@ -243,7 +252,7 @@ final class CarDiag {
                 }
             }
 
-            for (String table : new String[]{"global", "system", "secure"}) {
+            for (String table : SETTINGS_TABLES) {
                 w.write("\n== Settings." + table + "\n");
                 writeSettings(c, table, w);
             }
@@ -268,15 +277,14 @@ final class CarDiag {
             for (CarApi.PropertyConfig p : list) {
                 w.write(prop(c, p.id) + " | " + p.type + " access=" + p.access + " change=" + p.changeMode
                         + " rate=" + p.minRate + ".." + p.maxRate + "\n");
+                boolean secret = isSecretProp(c, p.id);
                 for (int area : p.areas) {
                     String v;
                     try {
                         Object[] sv = car.getProperty(p.id, area);
-                        v = "status=" + sv[0] + " "
-                                + (isSecretProp(c, p.id) ? "<hidden>" : value(sv[1]));
+                        v = "status=" + sv[0] + " " + (secret ? "<hidden>" : value(sv[1]));
                     } catch (Throwable e) {
-                        Throwable cause = e.getCause() != null ? e.getCause() : e;
-                        v = "error " + cause.getClass().getSimpleName();
+                        v = "error " + CarApi.errorName(e);
                     }
                     w.write("    area " + hex(area) + " = " + v + "\n");
                 }
@@ -285,9 +293,13 @@ final class CarDiag {
         return out;
     }
 
+    static Uri settingsUri(String table) {
+        return Uri.parse("content://settings/" + table);
+    }
+
     /** Все ключи таблицы Settings; значения секретных ключей скрыты. */
     private static void writeSettings(Context c, String table, FileWriter w) throws Exception {
-        try (Cursor cur = c.getContentResolver().query(Uri.parse("content://settings/" + table),
+        try (Cursor cur = c.getContentResolver().query(settingsUri(table),
                 new String[]{"name", "value"}, null, null, "name")) {
             if (cur == null) {
                 w.write("(no access)\n");

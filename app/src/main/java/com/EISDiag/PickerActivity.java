@@ -80,30 +80,28 @@ public class PickerActivity extends BaseActivity {
     /** Открывается последняя выбранная папка, если она ещё доступна, иначе память устройства. */
     private void openStartDir() {
         String last = prefs.getString(Prefs.PICKER_LAST_DIR, null);
-        if (last != null) {
-            File d = new File(last);
-            File r = FileUtils.findRoot(d, roots);
-            if (r != null && d.isDirectory()) {
-                root = r;
-                open(d);
-                return;
-            }
-        }
-        root = FileUtils.INTERNAL_ROOT;
-        open(root);
+        if (last == null || !openIfAvailable(new File(last))) openInternal();
     }
 
     private void refreshRoots() {
         roots = FileUtils.storageRoots();
-        File r = dir != null ? FileUtils.findRoot(dir, roots) : null;
-        if (r == null || !dir.isDirectory()) {
-            if (root != null && !roots.contains(root)) toast(getString(R.string.picker_storage_gone, FileUtils.rootLabel(this, root)));
-            root = FileUtils.INTERNAL_ROOT;
-            open(root);
-        } else {
-            root = r;
-            open(dir);
-        }
+        if (dir != null && openIfAvailable(dir)) return;
+        if (root != null && !roots.contains(root)) toast(getString(R.string.picker_storage_gone, FileUtils.rootLabel(this, root)));
+        openInternal();
+    }
+
+    /** Открыть папку, если она есть и лежит на одном из накопителей. */
+    private boolean openIfAvailable(File d) {
+        File r = FileUtils.findRoot(d, roots);
+        if (r == null || !d.isDirectory()) return false;
+        root = r;
+        open(d);
+        return true;
+    }
+
+    private void openInternal() {
+        root = FileUtils.INTERNAL_ROOT;
+        open(root);
     }
 
     private void open(File d) {
@@ -128,10 +126,7 @@ public class PickerActivity extends BaseActivity {
             rootsBar.addView(item);
         }
         if (roots.size() == 1) {
-            TextView hint = new TextView(this);
-            hint.setText(R.string.picker_no_usb);
-            hint.setTextSize(15);
-            hint.setTextColor(getColor(R.color.text_secondary));
+            TextView hint = Ui.text(this, getString(R.string.picker_no_usb), 15, R.color.text_secondary);
             hint.setPadding(Ui.dp(this, 16), Ui.dp(this, 8), Ui.dp(this, 8), 0);
             rootsBar.addView(hint);
         }
@@ -147,23 +142,14 @@ public class PickerActivity extends BaseActivity {
         for (int i = 0; i < chain.size(); i++) {
             final File f = chain.get(i);
             boolean last = i == chain.size() - 1;
-            if (i > 0) {
-                TextView sep = new TextView(this);
-                sep.setText("›");
-                sep.setTextSize(20);
-                sep.setTextColor(getColor(R.color.text_disabled));
-                crumbs.addView(sep);
-            }
-            TextView part = new TextView(this);
-            part.setText(i == 0 ? FileUtils.rootLabel(this, root) : f.getName());
-            part.setTextSize(18);
+            if (i > 0) crumbs.addView(Ui.text(this, "›", 20, R.color.text_disabled));
+            TextView part = Ui.text(this, i == 0 ? FileUtils.rootLabel(this, root) : f.getName(), 18,
+                    last ? R.color.text_primary : R.color.accent);
             part.setGravity(Gravity.CENTER_VERTICAL);
             part.setPadding(Ui.dp(this, 10), 0, Ui.dp(this, 10), 0);
             if (last) {
-                part.setTextColor(getColor(R.color.text_primary));
                 part.setTypeface(Typeface.DEFAULT_BOLD);
             } else {
-                part.setTextColor(getColor(R.color.accent));
                 part.setBackgroundResource(Ui.selectableBackground(this));
                 part.setOnClickListener(v -> open(f));
             }
@@ -197,10 +183,7 @@ public class PickerActivity extends BaseActivity {
         LinearLayout.LayoutParams nameLp = new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1);
         nameLp.setMarginStart(Ui.dp(this, 8));
         row.addView(Ui.title(this, d.getName()), nameLp);
-        TextView chevron = new TextView(this);
-        chevron.setText("›");
-        chevron.setTextSize(28);
-        chevron.setTextColor(getColor(R.color.text_disabled));
+        TextView chevron = Ui.text(this, "›", 28, R.color.text_disabled);
         chevron.setPadding(Ui.dp(this, 16), 0, Ui.dp(this, 16), 0);
         row.addView(chevron);
         row.setBackgroundResource(Ui.selectableBackground(this));
@@ -210,10 +193,7 @@ public class PickerActivity extends BaseActivity {
     }
 
     private TextView sideText(String text) {
-        TextView v = new TextView(this);
-        v.setText(text);
-        v.setTextSize(18);
-        v.setTextColor(getColor(R.color.text_primary));
+        TextView v = Ui.text(this, text, 18, R.color.text_primary);
         v.setTypeface(Typeface.DEFAULT_BOLD);
         v.setPadding(0, Ui.dp(this, 6), 0, Ui.dp(this, 6));
         return v;

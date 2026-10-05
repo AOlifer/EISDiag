@@ -253,9 +253,7 @@ public class DiagnosticsActivity extends BaseActivity {
 
     /** Описание программы, версия, разработчик и лицензия; оттуда же — отказ от ответственности. */
     private void showHelp() {
-        TextView update = new TextView(this);
-        update.setTextSize(16);
-        update.setTextColor(getColor(R.color.accent));
+        TextView update = Ui.text(this, null, 16, R.color.accent);
         update.setBackgroundResource(Ui.selectableBackground(this));
         updates.bind(update);
         new AlertDialog.Builder(this)
@@ -274,20 +272,13 @@ public class DiagnosticsActivity extends BaseActivity {
         LinearLayout box = new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(pad, pad, pad, Ui.dp(this, 4));
-        TextView title = new TextView(this);
-        title.setText(R.string.diag_title);
-        title.setTextSize(22);
+        TextView title = Ui.text(this, getString(R.string.diag_title), 22, R.color.text_primary);
         title.setTypeface(Typeface.DEFAULT_BOLD);
-        title.setTextColor(getColor(R.color.text_primary));
         box.addView(title);
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
-        TextView version = new TextView(this);
-        version.setText(getString(R.string.help_version, versionName()));
-        version.setTextSize(16);
-        version.setTextColor(getColor(R.color.text_secondary));
-        row.addView(version);
+        row.addView(Ui.text(this, getString(R.string.help_version, versionName()), 16, R.color.text_secondary));
         update.setPadding(Ui.dp(this, 20), Ui.dp(this, 6), Ui.dp(this, 8), Ui.dp(this, 6));
         row.addView(update);
         box.addView(row);
@@ -331,14 +322,15 @@ public class DiagnosticsActivity extends BaseActivity {
 
     private void updateUi() {
         if (destroyed) return;
+        boolean recording = recording();
         if (!busy) {
-            String carState = !CarApi.isAvailable() ? getString(R.string.diag_car_missing)
-                    : car != null && car.isConnected() ? getString(R.string.diag_car_connected)
-                    : getString(R.string.diag_car_connecting);
-            status.setText(getString(recording() ? R.string.diag_status_recording : R.string.diag_status_idle)
-                    + "\n" + carState);
+            int carState = !CarApi.isAvailable() ? R.string.diag_car_missing
+                    : car != null && car.isConnected() ? R.string.diag_car_connected
+                    : R.string.diag_car_connecting;
+            status.setText(getString(recording ? R.string.diag_status_recording : R.string.diag_status_idle)
+                    + "\n" + getString(carState));
         }
-        btnRecord.setText(recording() ? R.string.diag_record_stop : R.string.diag_record_start);
+        btnRecord.setText(recording ? R.string.diag_record_stop : R.string.diag_record_start);
         long total = 0;
         File[] all = CarDiag.files(this);
         for (File f : all) total += f.length();

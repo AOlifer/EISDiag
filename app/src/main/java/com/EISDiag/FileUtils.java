@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -52,14 +54,19 @@ final class FileUtils {
         return null;
     }
 
+    /** Переписать поток целиком; потоки не закрываются. */
+    static void copy(InputStream in, OutputStream out) throws IOException {
+        byte[] buf = new byte[65536];
+        int n;
+        while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+    }
+
     /** Копирование через временный файл: при ошибке существующий файл не портится. */
     static boolean copyFileQuiet(File src, File dst) {
         File tmp = new File(dst.getParentFile(), "." + dst.getName() + ".tmp");
         try (FileInputStream in = new FileInputStream(src);
              FileOutputStream out = new FileOutputStream(tmp)) {
-            byte[] buf = new byte[65536];
-            int n;
-            while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+            copy(in, out);
             out.flush();
             out.getFD().sync();
         } catch (IOException e) {
@@ -82,9 +89,7 @@ final class FileUtils {
         if (copyFileQuiet(src, dst)) return null;
         try (FileInputStream in = new FileInputStream(src);
              FileOutputStream out = new FileOutputStream(dst)) {
-            byte[] buf = new byte[65536];
-            int n;
-            while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+            copy(in, out);
             return null;
         } catch (IOException e) {
             Log.w(TAG, "copy " + src + " -> " + dst, e);

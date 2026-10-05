@@ -166,21 +166,23 @@ public class CarDiagService extends Service {
             CarDiag.log(this, "CAR property list failed: " + e);
             return;
         }
+        // Один слушатель на все свойства: id и зона приходят в каждом событии.
+        CarApi.PropertyListener listener = new CarApi.PropertyListener() {
+            @Override public void onChange(int id, int area, int status, Object value) {
+                onProperty(id, area, status, value);
+            }
+
+            @Override public void onError(int id, int area) {
+                CarDiag.log(CarDiagService.this, "PROP ERROR " + CarDiag.prop(CarDiagService.this, id)
+                        + " area " + CarDiag.hex(area));
+            }
+        };
         int ok = 0, failed = 0;
         for (CarApi.PropertyConfig p : list) {
             if (p.changeMode == 0) continue; // STATIC: не меняется
             changeModes.put(p.id, p.changeMode);
             float rate = p.changeMode == 2 ? Math.max(p.minRate, Math.min(1f, p.maxRate)) : 0f;
-            Object l = car.registerProperty(p.id, rate, new CarApi.PropertyListener() {
-                @Override public void onChange(int id, int area, int status, Object value) {
-                    onProperty(id, area, status, value);
-                }
-
-                @Override public void onError(int id, int area) {
-                    CarDiag.log(CarDiagService.this, "PROP ERROR " + CarDiag.prop(CarDiagService.this, id)
-                            + " area " + CarDiag.hex(area));
-                }
-            });
+            Object l = car.registerProperty(p.id, rate, listener);
             if (l != null) ok++;
             else failed++;
         }
@@ -203,8 +205,7 @@ public class CarDiagService extends Service {
         long interval = continuous ? CONTINUOUS_INTERVAL_MS : ON_CHANGE_INTERVAL_MS;
         boolean zeroCrossing = prev != null && isZero(prev) != isZero(v);
         if (last != null && now - last < interval && !zeroCrossing) {
-            Integer n = skipped.get(key);
-            skipped.put(key, n == null ? 1 : n + 1);
+            skipped.merge(key, 1, Integer::sum);
             return;
         }
         Integer n = skipped.remove(key);
@@ -265,14 +266,13 @@ public class CarDiagService extends Service {
                         + CarDiag.safeValue(name, readSetting(table, name)));
             }
         };
-        for (String table : new String[]{"global", "system", "secure"}) {
-            getContentResolver().registerContentObserver(Uri.parse("content://settings/" + table),
-                    true, settingsObserver);
+        for (String table : CarDiag.SETTINGS_TABLES) {
+            getContentResolver().registerContentObserver(CarDiag.settingsUri(table), true, settingsObserver);
         }
     }
 
     private String readSetting(String table, String name) {
-        try (Cursor c = getContentResolver().query(Uri.parse("content://settings/" + table),
+        try (Cursor c = getContentResolver().query(CarDiag.settingsUri(table),
                 new String[]{"value"}, "name=?", new String[]{name}, null)) {
             return c != null && c.moveToFirst() ? c.getString(0) : null;
         } catch (Exception e) {

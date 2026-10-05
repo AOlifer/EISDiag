@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 
@@ -19,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Locale;
 
@@ -78,7 +81,7 @@ final class Updater {
         HttpURLConnection c = open(context.getString(R.string.update_url));
         try {
             byte[] body = readAll(c.getInputStream(), MAX_JSON_BYTES);
-            JSONObject o = new JSONObject(new String(body, "UTF-8"));
+            JSONObject o = new JSONObject(new String(body, StandardCharsets.UTF_8));
             Release r = new Release();
             r.versionCode = o.getInt("versionCode");
             r.versionName = o.getString("versionName");
@@ -113,10 +116,9 @@ final class Updater {
      * @return готовый файл или null, если загрузку отменили.
      */
     File download(Release r, Progress progress) throws IOException {
-        File dir = new File(context.getCacheDir(), "update");
+        File dir = updateDir(context);
         if (!dir.isDirectory() && !dir.mkdirs()) throw new IOException("no cache dir");
-        File[] old = dir.listFiles();
-        if (old != null) for (File f : old) f.delete();
+        clearUpdateDir(context);
         File apk = new File(dir, "EISDiag-" + r.versionCode + ".apk");
 
         HttpURLConnection c = open(r.apk);
@@ -176,9 +178,7 @@ final class Updater {
         try (PackageInstaller.Session s = pi.openSession(id)) {
             try (InputStream in = new FileInputStream(apk);
                  OutputStream out = s.openWrite("base.apk", 0, apk.length())) {
-                byte[] buf = new byte[64 * 1024];
-                int n;
-                while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+                FileUtils.copy(in, out);
                 s.fsync(out);
             }
             Intent i = new Intent(context, ResultReceiver.class);
@@ -188,6 +188,17 @@ final class Updater {
             pi.abandonSession(id);
             throw e;
         }
+    }
+
+    /** Папка загрузки обновлений в кэше. */
+    private static File updateDir(Context c) {
+        return new File(c.getCacheDir(), "update");
+    }
+
+    /** Удалить скачанные раньше APK. */
+    private static void clearUpdateDir(Context c) {
+        File[] old = updateDir(c).listFiles();
+        if (old != null) for (File f : old) f.delete();
     }
 
     private static HttpURLConnection open(String url) throws IOException {
@@ -238,9 +249,9 @@ final class Updater {
                 }
             } else if (status != PackageInstaller.STATUS_SUCCESS) {
                 String msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE);
-                android.widget.Toast.makeText(context,
+                Toast.makeText(context,
                         context.getString(R.string.update_error_install, msg == null ? String.valueOf(status) : msg),
-                        android.widget.Toast.LENGTH_LONG).show();
+                        Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -249,10 +260,10 @@ final class Updater {
     public static class ReplacedReceiver extends BroadcastReceiver {
         @Override public void onReceive(Context context, Intent intent) {
             if (!Intent.ACTION_MY_PACKAGE_REPLACED.equals(intent.getAction())) return;
-            File[] left = new File(context.getCacheDir(), "update").listFiles();
-            if (left != null) for (File f : left) f.delete();
-            if (!Prefs.get(context).getBoolean(Prefs.UPDATE_REOPEN, false)) return;
-            Prefs.get(context).edit().remove(Prefs.UPDATE_REOPEN).apply();
+            clearUpdateDir(context);
+            SharedPreferences prefs = Prefs.get(context);
+            if (!prefs.getBoolean(Prefs.UPDATE_REOPEN, false)) return;
+            prefs.edit().remove(Prefs.UPDATE_REOPEN).apply();
             Intent i = new Intent(context, DiagnosticsActivity.class);
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(i);
