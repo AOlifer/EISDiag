@@ -67,4 +67,27 @@
     <string name="help_disclaimer_short">⚠ Unofficial app, use at your own risk.</string>
     <string name="disclaimer_title">Disclaimer</string>
     <string name="disclaimer_text">EISDiag is an unofficial application. It is not affiliated with, endorsed or supported by the Evolute car manufacturer, its dealers or the head unit suppliers.\n\nThe application runs with system privileges and reads data of the car and the head unit; it writes nothing to the car or the stock software.\n\nThe software is provided “as is”, without warranty of any kind. You install and use it at your own risk. The author is not liable for any damage, including malfunction of the head unit or other vehicle systems, loss of data or settings, the need to reset or reflash the unit, refusal of warranty service, and any consequences while operating the vehicle.\n\nFirmware updates or the manufacturer’s server may make the application stop working, or make the data it collects incomplete or inaccurate.\n\nDiagnostic files may contain information about the car and connected devices. Review them before sharing.\n\nDo not use the application while driving, only while the vehicle is stationary.</string>
+
+    <!-- Updates (Updater) -->
+    <string name="update_check">Check for updates</string>
+    <string name="update_checking">Checking for updates…</string>
+    <string name="update_latest">You have the latest version</string>
+    <string name="update_available">Version %1$s is available. Details…</string>
+    <string name="update_available_help">Version %1$s is available: open Help (?)</string>
+    <string name="update_failed">Could not check for updates. Tap to retry</string>
+    <string name="update_title">Update to version %1$s</string>
+    <string name="update_released">Released %1$s.</string>
+    <string name="update_size">Download size: %1$s.</string>
+    <string name="update_install">Download and install</string>
+    <string name="update_download">Download and verify</string>
+    <string name="update_later">Later</string>
+    <string name="update_downloading">Downloading the update…</string>
+    <string name="update_installing">Installing the update. The app will close and open again.</string>
+    <string name="update_emulator_note">The emulator build only downloads and verifies the update: the car APK is signed with a different key.</string>
+    <string name="update_emulator_done">The APK has been downloaded and verified: %1$s</string>
+    <string name="update_error">Update failed: %1$s</string>
+    <string name="update_error_checksum">the downloaded file is damaged (checksum mismatch)</string>
+    <string name="update_error_package">the file is not an EISDiag update</string>
+    <string name="update_error_version">the file is not newer than the installed version</string>
+    <string name="update_error_install">Installation failed: %1$s</string>
 </resources>

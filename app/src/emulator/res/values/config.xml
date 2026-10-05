@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Обновление только скачивается и проверяется: APK для машины подписан другим ключом. -->
+    <bool name="update_can_install">false</bool>
+</resources>

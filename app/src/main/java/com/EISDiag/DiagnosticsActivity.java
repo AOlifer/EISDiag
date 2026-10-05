@@ -8,8 +8,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.graphics.Typeface;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,6 +48,7 @@ public class DiagnosticsActivity extends Activity {
     private boolean busy = false;
     private boolean destroyed = false;
     private int marks = 0;
+    private UpdateController updates;
     /** Одна ссылка на метод: removeCallbacks находит задачу только по тому же объекту. */
     private final Runnable refreshTask = this::refresh;
 
@@ -73,7 +77,9 @@ public class DiagnosticsActivity extends Activity {
         io = new Handler(thread.getLooper());
         io.post(this::connectCar);
         updateUi();
+        updates = new UpdateController(this, prefs);
         if (b == null && !prefs.getBoolean(Prefs.DISCLAIMER_SHOWN, false)) showDisclaimer(true);
+        if (b == null) updates.autoCheckForUpdates();
     }
 
     @Override protected void onResume() {
@@ -88,6 +94,7 @@ public class DiagnosticsActivity extends Activity {
 
     @Override protected void onDestroy() {
         destroyed = true;
+        updates.destroy();
         ui.removeCallbacksAndMessages(null);
         io.post(() -> {
             if (car != null) car.disconnect();
@@ -240,18 +247,53 @@ public class DiagnosticsActivity extends Activity {
 
     /** Описание программы, версия, разработчик и лицензия; оттуда же — отказ от ответственности. */
     private void showHelp() {
-        String version = "";
-        try {
-            version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
-        } catch (Exception ignored) {
-        }
+        TextView update = new TextView(this);
+        update.setTextSize(16);
+        update.setTextColor(getColor(R.color.accent));
+        update.setBackgroundResource(Ui.selectableBackground(this));
+        updates.bind(update);
         new AlertDialog.Builder(this)
-                .setTitle(R.string.diag_title)
-                .setMessage(getString(R.string.help_text) + "\n\n" + getString(R.string.help_version, version)
-                        + "\n" + getString(R.string.help_developer) + "\n\n" + getString(R.string.help_disclaimer_short))
+                .setCustomTitle(helpTitle(update))
+                .setMessage(getString(R.string.help_text) + "\n\n" + getString(R.string.help_developer)
+                        + "\n\n" + getString(R.string.help_disclaimer_short))
                 .setPositiveButton(R.string.got_it, null)
                 .setNeutralButton(R.string.disclaimer_title, (d, w) -> showDisclaimer(false))
+                .setOnDismissListener(d -> updates.bind(null))
                 .show();
+    }
+
+    /** Шапка окна Помощи: название, под ним версия и «Проверить обновления». */
+    private View helpTitle(TextView update) {
+        int pad = Ui.dp(this, 24);
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(pad, pad, pad, Ui.dp(this, 4));
+        TextView title = new TextView(this);
+        title.setText(R.string.diag_title);
+        title.setTextSize(22);
+        title.setTypeface(Typeface.DEFAULT_BOLD);
+        title.setTextColor(getColor(R.color.text_primary));
+        box.addView(title);
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        TextView version = new TextView(this);
+        version.setText(getString(R.string.help_version, versionName()));
+        version.setTextSize(16);
+        version.setTextColor(getColor(R.color.text_secondary));
+        row.addView(version);
+        update.setPadding(Ui.dp(this, 20), Ui.dp(this, 6), Ui.dp(this, 8), Ui.dp(this, 6));
+        row.addView(update);
+        box.addView(row);
+        return box;
+    }
+
+    private String versionName() {
+        try {
+            return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     /**

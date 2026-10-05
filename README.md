@@ -1,6 +1,6 @@
 # EISDiag — Evolute I-Space Diagnostics
 
-«Диагностика машины» — приложение для магнитолы Evolute i-Space (прошивка Yato1, Android 9):
+«Диагностика машины» — приложение для головного устройства Evolute i-Space (прошивка Yato1, Android 9):
 показывает, какие данные и события машины доступны приложениям. Только чтение — в машину ничего
 не записывается. Выделено из [EISWM](https://github.com/AOlifer/EISWM) («Менеджер приветствия»),
 где раньше было скрытым экраном.
@@ -49,6 +49,24 @@ PKCS#12 для Gradle собирается из них автоматическ�
 
 APK для машины ставится поверх через флешку или `adb install -r`. Приложение отдельное от
 EISWM (`applicationId com.EISDiag`), их можно держать одновременно.
+
+## Обновления
+
+Следующие версии приложение ставит само: «Проверить обновления» в шапке окна Помощи
+(при запуске проверка идёт сама, не чаще раза в сутки). Описание последней версии — JSON
+по адресу `https://aolifer.github.io/EISDiag/updates/latest` (файл `docs/updates/latest`,
+GitHub Pages из ветки `master`, папка `/docs`):
+
+```json
+{"versionCode": 6, "versionName": "0.2", "date": "2026-10-05",
+ "apk": "https://github.com/AOlifer/EISDiag/releases/download/0.2/EISDiag-0.2.apk",
+ "size": 1234567, "sha256": "…",
+ "changes": {"ru": "…", "en": "…", "de": "…", "zh": "…"}}
+```
+
+Обязательны `versionCode`, `versionName` и `apk`. APK скачивается, сверяется с `sha256`,
+именем пакета и номером версии и ставится через PackageInstaller (system uid, без окна
+установщика). Вариант `emulator` обновление только скачивает и проверяет.
 
 ## Ветки
 

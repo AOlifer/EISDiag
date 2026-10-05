@@ -63,4 +63,27 @@
     <string name="help_disclaimer_short">⚠ 非官方应用，使用风险自负。</string>
     <string name="disclaimer_title">免责声明</string>
     <string name="disclaimer_text">EISDiag 是非官方应用。它与 Evolute 汽车制造商、其经销商及主机供应商无关，也未获得其认可或支持。\n\n本应用以系统权限运行，读取车辆和主机的数据；不会向车辆或原厂软件写入任何内容。\n\n本软件按“原样”提供，不附带任何形式的保证。安装和使用的风险由您自行承担。作者不对任何损害负责，包括主机或车辆其他系统故障、数据或设置丢失、需要重置或重新刷写主机、被拒绝保修，以及驾驶车辆时产生的任何后果。\n\n固件更新或制造商服务器可能导致本应用无法工作，或使其收集的数据不完整或不准确。\n\n诊断文件可能包含车辆和已连接设备的信息。分享前请先检查。\n\n请勿在行驶中使用本应用，仅在车辆停止时使用。</string>
+
+    <!-- Updates (Updater) -->
+    <string name="update_check">检查更新</string>
+    <string name="update_checking">正在检查更新…</string>
+    <string name="update_latest">已是最新版本</string>
+    <string name="update_available">有新版本 %1$s。详情…</string>
+    <string name="update_available_help">有新版本 %1$s：请打开帮助（?）</string>
+    <string name="update_failed">无法检查更新。点击重试</string>
+    <string name="update_title">更新到版本 %1$s</string>
+    <string name="update_released">发布于 %1$s。</string>
+    <string name="update_size">下载大小：%1$s。</string>
+    <string name="update_install">下载并安装</string>
+    <string name="update_download">下载并校验</string>
+    <string name="update_later">稍后</string>
+    <string name="update_downloading">正在下载更新…</string>
+    <string name="update_installing">正在安装更新。应用将关闭并重新打开。</string>
+    <string name="update_emulator_note">模拟器版本仅下载并校验更新：车载 APK 使用不同的密钥签名。</string>
+    <string name="update_emulator_done">APK 已下载并校验：%1$s</string>
+    <string name="update_error">更新失败：%1$s</string>
+    <string name="update_error_checksum">下载的文件已损坏（校验和不匹配）</string>
+    <string name="update_error_package">该文件不是 EISDiag 更新</string>
+    <string name="update_error_version">该文件的版本不比已安装的版本新</string>
+    <string name="update_error_install">安装失败：%1$s</string>
 </resources>

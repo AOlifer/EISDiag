@@ -11,4 +11,5 @@
     <color name="text_secondary">#9AA0A6</color>
     <color name="text_disabled">#5F6368</color>
     <color name="divider">#33FFFFFF</color>
+    <color name="logo_dot">#F2FAFF</color>
 </resources>
