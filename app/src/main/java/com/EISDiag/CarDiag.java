@@ -66,7 +66,7 @@ final class CarDiag {
 
     private static final Object LOCK = new Object();
     /** Метка времени в журнале; SimpleDateFormat не потокобезопасен, используется под LOCK. */
-    private static final SimpleDateFormat LOG_TIME = new SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US);
+    private static final SimpleDateFormat LOG_TIME = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US);
     private static Map<Integer, String> names;
 
     private CarDiag() {}
