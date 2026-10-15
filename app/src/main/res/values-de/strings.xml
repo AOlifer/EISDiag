@@ -60,7 +60,7 @@
     <!-- Protokollanalyse -->
     <string name="analysis_title">Protokollanalyse</string>
     <string name="analysis_loading">Protokoll wird gelesen…</string>
-    <string name="analysis_save_window">Ausschnitt speichern</string>
+    <string name="analysis_save_window">Speichern</string>
     <string name="analysis_type_marks">Markierungen</string>
     <string name="analysis_type_power">Strom</string>
     <string name="analysis_type_broadcasts">Broadcasts</string>
@@ -73,12 +73,24 @@
     <string name="analysis_changes">Änderungen: %1$s; verschiedene Schlüssel: %2$d</string>
     <string name="analysis_no_changes">Keine Änderungen von Eigenschaften oder Einstellungen in der Nähe (andere Zeilen: %1$d)</string>
     <string name="analysis_truncated">%1$d Zeilen nicht angezeigt</string>
-    <string name="analysis_nothing_to_save">Wählen Sie zuerst ein Ereignis</string>
-    <string name="analysis_window_saved">Ausschnitt gespeichert: %1$s. Er wird zusammen mit dem Protokoll auf den USB-Stick kopiert.</string>
+    <string name="analysis_mode_events">Ereignisse</string>
+    <string name="analysis_mode_sessions">Sitzungen</string>
+    <string name="analysis_sessions">Sitzungen: %1$d</string>
+    <string name="analysis_no_sessions">Keine Aufzeichnungssitzungen</string>
+    <string name="analysis_session_title">Sitzung %1$s — %2$s</string>
+    <string name="analysis_session_duration">Dauer %1$s</string>
+    <string name="analysis_session_off">davor aus %1$s</string>
+    <string name="analysis_session_reason">Start: %1$s</string>
+    <string name="analysis_session_power">letzter Stromzustand: %1$s</string>
+    <string name="analysis_session_stopped">mit der Schaltfläche beendet</string>
+    <string name="analysis_session_problems">Fehler: %1$d</string>
+    <string name="analysis_session_lines">Zeilen: %1$s</string>
+    <string name="analysis_nothing_to_save">Wählen Sie zuerst ein Ereignis oder eine Sitzung</string>
+    <string name="analysis_window_saved">Gespeichert: %1$s. Die Datei wird zusammen mit dem Protokoll auf den USB-Stick kopiert.</string>
 
     <!-- Help -->
     <string name="help">Hilfe</string>
-    <string name="help_text">„Fahrzeugdiagnose“ zeigt, welche Fahrzeugdaten und -ereignisse Apps auf dem Evolute i-Space Infotainmentsystem zur Verfügung stehen. Nur Lesen: Ins Fahrzeug wird nichts geschrieben.\n\nAufzeichnung starten  Hintergrundaufzeichnung von Änderungen der Fahrzeugeigenschaften, Strom- und Ruhezuständen, Broadcasts, Settings-Schlüsseln und Systemeigenschaften. Beim Start wird sofort der Zustand erfasst; die Aufzeichnung läuft nach Neustart und Ruhezustand weiter, bis Sie sie beenden.\n\nSchaltflächen oben (langes Drücken zeigt den Namen):\n⚑  Markierung im Protokoll: einen Moment vor einer Aktion markieren, z. B. „jetzt Tür geöffnet“.\n📷  Fahrzeugzustand erfassen: alle Eigenschaften des Fahrzeugdienstes mit aktuellen Werten, Settings-Schlüssel, Systemeigenschaften.\n🔍  Protokollanalyse: eine Markierung, einen Stromzustand oder einen Broadcast wählen und alles sehen, was Sekunden davor und danach aufgezeichnet wurde.\n💾  Protokoll und Zustandsaufnahmen auf einen USB-Stick oder in den internen Speicher speichern.\n🗑  Protokoll leeren (Zustandsaufnahmen bleiben erhalten).\n\nToken, Nummern, Adressen, Kennungen und die FIN werden nicht in die Dateien geschrieben. Prüfen Sie die Dateien trotzdem, bevor Sie sie weitergeben.</string>
+    <string name="help_text">„Fahrzeugdiagnose“ zeigt, welche Fahrzeugdaten und -ereignisse Apps auf dem Evolute i-Space Infotainmentsystem zur Verfügung stehen. Nur Lesen: Ins Fahrzeug wird nichts geschrieben.\n\nAufzeichnung starten  Hintergrundaufzeichnung von Änderungen der Fahrzeugeigenschaften, Strom- und Ruhezuständen, Broadcasts, Settings-Schlüsseln und Systemeigenschaften. Beim Start wird sofort der Zustand erfasst; die Aufzeichnung läuft nach Neustart und Ruhezustand weiter, bis Sie sie beenden.\n\nSchaltflächen oben (langes Drücken zeigt den Namen):\n⚑  Markierung im Protokoll: einen Moment vor einer Aktion markieren, z. B. „jetzt Tür geöffnet“.\n📷  Fahrzeugzustand erfassen: alle Eigenschaften des Fahrzeugdienstes mit aktuellen Werten, Settings-Schlüssel, Systemeigenschaften.\n🔍  Protokollanalyse: eine Markierung, einen Stromzustand oder einen Broadcast wählen und alles sehen, was Sekunden davor und danach aufgezeichnet wurde, oder Aufzeichnungssitzungen ansehen: wann das Gerät aufwachte und einschlief, Pausen und Fehler.\n💾  Protokoll und Zustandsaufnahmen auf einen USB-Stick oder in den internen Speicher speichern.\n🗑  Protokoll leeren (Zustandsaufnahmen bleiben erhalten).\n\nToken, Nummern, Adressen, Kennungen und die FIN werden nicht in die Dateien geschrieben. Prüfen Sie die Dateien trotzdem, bevor Sie sie weitergeben.</string>
     <string name="help_version">Version %1$s</string>
     <string name="help_developer">Entwickler: AOlifer · Telegram: @oaaspb\nhttps://eisapp.ru/eisdiag\nLizenz PolyForm Noncommercial: nur nicht-kommerzielle Nutzung</string>
     <string name="help_disclaimer_short">⚠ Inoffizielle App, Nutzung auf eigenes Risiko.</string>

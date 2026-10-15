@@ -34,9 +34,12 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 /**
- * Анализ журнала: окно вокруг события. Слева опорные события (отметки, питание, броадкасты,
- * запуски записи), справа всё, что записано за ±N секунд до и после выбранного, со сводкой
- * изменений. Фрагмент можно сохранить файлом рядом с журналом — он уйдёт на флешку вместе с ним.
+ * Анализ журнала, два режима.
+ * «События»: слева опорные события (отметки, питание, броадкасты, запуски записи), справа всё,
+ * что записано за ±N секунд до и после выбранного, со сводкой изменений.
+ * «Сеансы»: слева сеансы записи (от запуска процесса сервиса до сна, выключения или остановки),
+ * справа их ход: питание, отметки, броадкасты, паузы и сбои.
+ * Окно или отчёт о сеансе можно сохранить файлом рядом с журналом — он уйдёт на флешку вместе с ним.
  */
 public class AnalysisActivity extends BaseActivity {
     /** Ширина окна в секундах (± от события). */
@@ -54,7 +57,8 @@ public class AnalysisActivity extends BaseActivity {
     private final Handler ui = new Handler(Looper.getMainLooper());
     private boolean destroyed = false;
 
-    private LinearLayout filters, anchorList, sizes;
+    private LinearLayout modes, filters, anchorList, sizes;
+    private android.view.View filterScroll;
     private ScrollView anchorScroll, windowScroll;
     private TextView anchorCount, windowTitle, windowSummary, windowText;
 
@@ -64,11 +68,16 @@ public class AnalysisActivity extends BaseActivity {
     private TextView selectedRow;
     private int seconds = 10;
     private LogAnalysis.Window window;
+    /** Режим «Сеансы» вместо «События». */
+    private boolean sessionsMode;
+    private LogAnalysis.Session session;
 
     @Override protected void onCreate(Bundle b) {
         super.onCreate(b);
         setContentView(R.layout.activity_analysis);
+        modes = findViewById(R.id.modeTabs);
         filters = findViewById(R.id.typeFilters);
+        filterScroll = findViewById(R.id.filterScroll);
         anchorList = findViewById(R.id.anchorList);
         anchorScroll = findViewById(R.id.anchorScroll);
         anchorCount = findViewById(R.id.anchorCount);
@@ -80,9 +89,10 @@ public class AnalysisActivity extends BaseActivity {
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         findViewById(R.id.btnRefresh).setOnClickListener(v -> load());
-        findViewById(R.id.btnSaveWindow).setOnClickListener(v -> saveWindow());
+        findViewById(R.id.btnSaveWindow).setOnClickListener(v -> save());
 
         for (String[] t : FILTER_TYPES) types.addAll(Arrays.asList(t));
+        buildModes();
         buildFilters();
         buildSizes();
         load();
@@ -105,9 +115,35 @@ public class AnalysisActivity extends BaseActivity {
             ui.post(() -> {
                 if (destroyed) return;
                 analysis = a;
-                showAnchors();
+                showList();
             });
         }, "eisdiag-analysis").start();
+    }
+
+    // ---------------------------------------------------------------- Режим
+
+    private void buildModes() {
+        modes.removeAllViews();
+        int[] labels = {R.string.analysis_mode_events, R.string.analysis_mode_sessions};
+        for (int i = 0; i < labels.length; i++) {
+            boolean sessions = i == 1;
+            TextView chip = chip(getString(labels[i]), sessions == sessionsMode);
+            chip.setOnClickListener(v -> {
+                if (sessionsMode == sessions) return;
+                sessionsMode = sessions;
+                buildModes();
+                showList();
+            });
+            modes.addView(chip);
+        }
+        int events = sessionsMode ? android.view.View.GONE : android.view.View.VISIBLE;
+        filterScroll.setVisibility(events);
+        sizes.setVisibility(events);
+    }
+
+    private void showList() {
+        if (sessionsMode) showSessions();
+        else showAnchors();
     }
 
     // ---------------------------------------------------------------- Список событий
@@ -163,13 +199,18 @@ public class AnalysisActivity extends BaseActivity {
         if (first != null) anchorScroll.post(() -> anchorScroll.scrollTo(0, Math.max(0, first.getTop() - Ui.dp(this, 40))));
     }
 
-    /** Строка списка: время события и его текст. */
+    /** Строка списка событий: время события и его текст. */
     private TextView anchorRow(LogAnalysis.Entry e) {
+        return listRow(e.stamp, e.text);
+    }
+
+    /** Строка списка: серая верхняя строка (время) и основная под ней. */
+    private TextView listRow(String top, String main) {
         TextView v = new TextView(this);
         SpannableStringBuilder sb = new SpannableStringBuilder();
-        sb.append(e.stamp);
+        sb.append(top);
         sb.setSpan(new ForegroundColorSpan(getColor(R.color.text_secondary)), 0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        sb.append('\n').append(e.text);
+        sb.append('\n').append(main);
         v.setText(sb);
         v.setTextSize(16);
         v.setTextColor(getColor(R.color.text_primary));
@@ -186,11 +227,101 @@ public class AnalysisActivity extends BaseActivity {
     }
 
     private void select(LogAnalysis.Entry e, TextView row) {
-        if (selectedRow != null) selectedRow.setBackgroundResource(Ui.selectableBackground(this));
+        highlight(row);
         selected = e;
+        showWindow();
+    }
+
+    private void highlight(TextView row) {
+        if (selectedRow != null) selectedRow.setBackgroundResource(Ui.selectableBackground(this));
         selectedRow = row;
         row.setBackgroundResource(R.drawable.tab_selected);
-        showWindow();
+    }
+
+    // ---------------------------------------------------------------- Сеансы
+
+    private void showSessions() {
+        anchorList.removeAllViews();
+        selectedRow = null;
+        if (analysis == null) return;
+        List<LogAnalysis.Session> all = analysis.sessions();
+        if (all.isEmpty()) {
+            Ui.emptyState(anchorList, getString(R.string.analysis_no_sessions), getString(R.string.analysis_no_events_hint));
+            anchorCount.setText(null);
+            session = null;
+            showSession();
+            return;
+        }
+        anchorCount.setText(getString(R.string.analysis_sessions, all.size()));
+        // Выбранный сеанс узнаётся по первой строке: после обновления журнала это новые объекты.
+        LogAnalysis.Session keep = all.get(0);
+        for (LogAnalysis.Session s : all) {
+            if (session != null && s.first().index == session.first().index && s.first().stamp.equals(session.first().stamp)) keep = s;
+        }
+        for (LogAnalysis.Session s : all) {
+            String end = s.last().stamp.length() >= 12 ? s.last().stamp.substring(s.last().stamp.length() - 12, s.last().stamp.length() - 4) : "";
+            String reason = s.reason();
+            TextView row = listRow(s.first().stamp.replaceAll("\\.\\d+$", "") + "  →  " + end,
+                    LogAnalysis.duration(s.duration()) + (reason.isEmpty() ? "" : "  ·  " + reason));
+            row.setOnClickListener(v -> {
+                highlight((TextView) v);
+                session = s;
+                showSession();
+            });
+            anchorList.addView(row);
+            if (s == keep) {
+                highlight(row);
+                session = s;
+                showSession();
+            }
+        }
+        TextView first = selectedRow;
+        if (first != null) anchorScroll.post(() -> anchorScroll.scrollTo(0, Math.max(0, first.getTop() - Ui.dp(this, 40))));
+    }
+
+    /** Ход сеанса справа: сводка сверху, затем питание, отметки, броадкасты, паузы и сбои. */
+    private void showSession() {
+        window = null;
+        if (analysis == null || session == null) {
+            windowTitle.setText(analysis == null ? getString(R.string.analysis_loading) : null);
+            windowSummary.setText(null);
+            windowText.setText(null);
+            return;
+        }
+        LogAnalysis.Session s = session;
+        windowTitle.setText(getString(R.string.analysis_session_title, s.first().stamp, s.last().stamp));
+        List<String> parts = new ArrayList<>();
+        parts.add(getString(R.string.analysis_session_duration, LogAnalysis.duration(s.duration())));
+        if (s.gapBefore >= 0) parts.add(getString(R.string.analysis_session_off, LogAnalysis.duration(s.gapBefore)));
+        if (!s.reason().isEmpty()) parts.add(getString(R.string.analysis_session_reason, s.reason()));
+        parts.add(s.stopped ? getString(R.string.analysis_session_stopped)
+                : getString(R.string.analysis_session_power, s.lastPower().isEmpty() ? "—" : s.lastPower()));
+        parts.add(getString(R.string.analysis_session_problems, s.problems().size()));
+        StringBuilder counts = new StringBuilder();
+        for (Map.Entry<String, Integer> c : s.typeCounts().entrySet()) {
+            if (counts.length() > 0) counts.append(", ");
+            counts.append(c.getKey()).append(' ').append(c.getValue());
+        }
+        windowSummary.setText(TextUtils.join("  ·  ", parts) + "\n" + getString(R.string.analysis_session_lines, counts));
+
+        SpannableStringBuilder sb = new SpannableStringBuilder();
+        int secondary = getColor(R.color.text_secondary);
+        int accent = getColor(R.color.accent);
+        for (LogAnalysis.Entry e : s.timeline()) {
+            int start = sb.length();
+            sb.append(LogAnalysis.timelineLine(s, e));
+            if (e.index < 0) {
+                sb.setSpan(new ForegroundColorSpan(secondary), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else if (LogAnalysis.MARK.equals(e.type) || e.text.startsWith("PROP ERROR")) {
+                sb.setSpan(new ForegroundColorSpan(accent), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                sb.setSpan(new StyleSpan(Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else if (LogAnalysis.POWER.equals(e.type)) {
+                sb.setSpan(new StyleSpan(Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            sb.append('\n');
+        }
+        windowText.setText(sb);
+        windowScroll.post(() -> windowScroll.scrollTo(0, 0));
     }
 
     // ---------------------------------------------------------------- Окно
@@ -281,16 +412,22 @@ public class AnalysisActivity extends BaseActivity {
         return sb;
     }
 
-    /** Сохраняет окно файлом window-….txt в папку диагностики; на флешку — вместе с журналом. */
-    private void saveWindow() {
-        if (window == null) {
+    /**
+     * Сохраняет окно (window-….txt) или отчёт о сеансе (session-….txt) в папку диагностики;
+     * на флешку файл уходит вместе с журналом.
+     */
+    private void save() {
+        String text = sessionsMode ? (session != null ? LogAnalysis.format(session) : null)
+                : (window != null ? LogAnalysis.format(window) : null);
+        if (text == null) {
             toast(getString(R.string.analysis_nothing_to_save));
             return;
         }
-        String name = "window-" + new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(new Date()) + ".txt";
+        String name = (sessionsMode ? "session-" : "window-")
+                + new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(new Date()) + ".txt";
         File f = new File(CarDiag.dir(this), name);
         try (Writer w = new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8)) {
-            w.write(LogAnalysis.format(window));
+            w.write(text);
             toast(getString(R.string.analysis_window_saved, name));
         } catch (Exception e) {
             toast(getString(R.string.diag_error, String.valueOf(e.getMessage())));
