@@ -40,6 +40,13 @@
             android:tooltipText="@string/diag_snapshot" />
 
         <ImageButton
+            android:id="@+id/btnAnalysis"
+            style="@style/EISDiag.TopIcon"
+            android:contentDescription="@string/analysis_title"
+            android:src="@drawable/ic_analysis"
+            android:tooltipText="@string/analysis_title" />
+
+        <ImageButton
             android:id="@+id/btnSave"
             style="@style/EISDiag.TopIcon"
             android:contentDescription="@string/diag_save"

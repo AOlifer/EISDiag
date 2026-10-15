@@ -68,6 +68,7 @@ public class DiagnosticsActivity extends BaseActivity {
         btnRecord.setOnClickListener(v -> toggleRecording());
         findViewById(R.id.btnMark).setOnClickListener(v -> mark());
         btnSnapshot.setOnClickListener(v -> snapshot());
+        findViewById(R.id.btnAnalysis).setOnClickListener(v -> startActivity(new Intent(this, AnalysisActivity.class)));
         btnSave.setOnClickListener(v -> openSaveFolderPicker());
         btnClear.setOnClickListener(v -> confirmClearLog());
         findViewById(R.id.btnHelp).setOnClickListener(v -> showHelp());

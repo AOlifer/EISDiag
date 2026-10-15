@@ -57,9 +57,28 @@
     <string name="diag_car_connecting">Verbindung zum Fahrzeugdienst…</string>
     <string name="diag_car_missing">Diese Firmware hat keine Fahrzeug-API</string>
 
+    <!-- Protokollanalyse -->
+    <string name="analysis_title">Protokollanalyse</string>
+    <string name="analysis_loading">Protokoll wird gelesen…</string>
+    <string name="analysis_save_window">Ausschnitt speichern</string>
+    <string name="analysis_type_marks">Markierungen</string>
+    <string name="analysis_type_power">Strom</string>
+    <string name="analysis_type_broadcasts">Broadcasts</string>
+    <string name="analysis_type_starts">Starts</string>
+    <string name="analysis_events">Ereignisse: %1$d</string>
+    <string name="analysis_events_limited">Die letzten %1$d von %2$d Ereignissen</string>
+    <string name="analysis_no_events">Keine Ereignisse</string>
+    <string name="analysis_no_events_hint">Starten Sie die Aufzeichnung und setzen Sie Markierungen im Hauptbildschirm oder schalten Sie oben weitere Ereignistypen ein.</string>
+    <string name="analysis_window_size">±%1$d s</string>
+    <string name="analysis_changes">Änderungen: %1$s; verschiedene Schlüssel: %2$d</string>
+    <string name="analysis_no_changes">Keine Änderungen von Eigenschaften oder Einstellungen in der Nähe (andere Zeilen: %1$d)</string>
+    <string name="analysis_truncated">%1$d Zeilen nicht angezeigt</string>
+    <string name="analysis_nothing_to_save">Wählen Sie zuerst ein Ereignis</string>
+    <string name="analysis_window_saved">Ausschnitt gespeichert: %1$s. Er wird zusammen mit dem Protokoll auf den USB-Stick kopiert.</string>
+
     <!-- Help -->
     <string name="help">Hilfe</string>
-    <string name="help_text">„Fahrzeugdiagnose“ zeigt, welche Fahrzeugdaten und -ereignisse Apps auf dem Evolute i-Space Infotainmentsystem zur Verfügung stehen. Nur Lesen: Ins Fahrzeug wird nichts geschrieben.\n\nAufzeichnung starten  Hintergrundaufzeichnung von Änderungen der Fahrzeugeigenschaften, Strom- und Ruhezuständen, Broadcasts, Settings-Schlüsseln und Systemeigenschaften. Beim Start wird sofort der Zustand erfasst; die Aufzeichnung läuft nach Neustart und Ruhezustand weiter, bis Sie sie beenden.\n\nSchaltflächen oben (langes Drücken zeigt den Namen):\n⚑  Markierung im Protokoll: einen Moment vor einer Aktion markieren, z. B. „jetzt Tür geöffnet“.\n📷  Fahrzeugzustand erfassen: alle Eigenschaften des Fahrzeugdienstes mit aktuellen Werten, Settings-Schlüssel, Systemeigenschaften.\n💾  Protokoll und Zustandsaufnahmen auf einen USB-Stick oder in den internen Speicher speichern.\n🗑  Protokoll leeren (Zustandsaufnahmen bleiben erhalten).\n\nToken, Nummern, Adressen, Kennungen und die FIN werden nicht in die Dateien geschrieben. Prüfen Sie die Dateien trotzdem, bevor Sie sie weitergeben.</string>
+    <string name="help_text">„Fahrzeugdiagnose“ zeigt, welche Fahrzeugdaten und -ereignisse Apps auf dem Evolute i-Space Infotainmentsystem zur Verfügung stehen. Nur Lesen: Ins Fahrzeug wird nichts geschrieben.\n\nAufzeichnung starten  Hintergrundaufzeichnung von Änderungen der Fahrzeugeigenschaften, Strom- und Ruhezuständen, Broadcasts, Settings-Schlüsseln und Systemeigenschaften. Beim Start wird sofort der Zustand erfasst; die Aufzeichnung läuft nach Neustart und Ruhezustand weiter, bis Sie sie beenden.\n\nSchaltflächen oben (langes Drücken zeigt den Namen):\n⚑  Markierung im Protokoll: einen Moment vor einer Aktion markieren, z. B. „jetzt Tür geöffnet“.\n📷  Fahrzeugzustand erfassen: alle Eigenschaften des Fahrzeugdienstes mit aktuellen Werten, Settings-Schlüssel, Systemeigenschaften.\n🔍  Protokollanalyse: eine Markierung, einen Stromzustand oder einen Broadcast wählen und alles sehen, was Sekunden davor und danach aufgezeichnet wurde.\n💾  Protokoll und Zustandsaufnahmen auf einen USB-Stick oder in den internen Speicher speichern.\n🗑  Protokoll leeren (Zustandsaufnahmen bleiben erhalten).\n\nToken, Nummern, Adressen, Kennungen und die FIN werden nicht in die Dateien geschrieben. Prüfen Sie die Dateien trotzdem, bevor Sie sie weitergeben.</string>
     <string name="help_version">Version %1$s</string>
     <string name="help_developer">Entwickler: AOlifer · Telegram: @oaaspb\nhttps://eisapp.ru/eisdiag\nLizenz PolyForm Noncommercial: nur nicht-kommerzielle Nutzung</string>
     <string name="help_disclaimer_short">⚠ Inoffizielle App, Nutzung auf eigenes Risiko.</string>
