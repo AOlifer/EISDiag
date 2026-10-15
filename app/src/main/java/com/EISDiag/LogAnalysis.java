@@ -190,6 +190,157 @@ final class LogAnalysis {
         return sb.toString();
     }
 
+    // ---------------------------------------------------------------- Сеансы
+
+    /** Тишина в журнале дольше этого внутри сеанса — пауза (сон без перезапуска процесса). */
+    static final long PAUSE_MS = 2 * 60 * 1000L;
+    /** Строки с этими словами — сбои записи: ошибки свойств, отвалы сервиса машины. */
+    private static final String[] PROBLEMS = {
+            "PROP ERROR", "CAR service disconnected", "CAR connect failed", "CAR property list failed",
+            "POWER listener failed", "CAR bw.car.proxy library is not available"};
+
+    /**
+     * Сеанс записи: от «=== recording started» (новый процесс сервиса — после загрузки или
+     * глубокого сна машины) до следующего такого же или до «=== recording stopped».
+     */
+    static final class Session {
+        final List<Entry> lines = new ArrayList<>();
+        /** Время от конца прошлого сеанса до начала этого, мс; -1 у первого. */
+        long gapBefore = -1;
+        /** Остановлен кнопкой («=== recording stopped»), а не оборвался сном или выключением. */
+        boolean stopped;
+
+        Entry first() {
+            return lines.get(0);
+        }
+
+        Entry last() {
+            return lines.get(lines.size() - 1);
+        }
+
+        long duration() {
+            return last().time - first().time;
+        }
+
+        /** Причина запуска из первой строки START: кнопка, загрузка, броадкаст пробуждения. */
+        String reason() {
+            for (Entry e : lines) {
+                if (!START.equals(e.type)) continue;
+                String r = e.text.substring(START.length()).trim();
+                int age = r.indexOf(", process age");
+                return age >= 0 ? r.substring(0, age) : r;
+            }
+            return "";
+        }
+
+        /** Последнее состояние питания в сеансе («2 DEEP_SLEEP_ENTER»), пустое — если смен не было. */
+        String lastPower() {
+            for (int i = lines.size() - 1; i >= 0; i--) {
+                Entry e = lines.get(i);
+                if (POWER.equals(e.type) && !e.text.contains("failed")) return e.text.substring(POWER.length()).trim();
+            }
+            return "";
+        }
+
+        /** Строки-сбои: ошибки свойств, отвалы и неудачные подключения к сервису машины. */
+        List<Entry> problems() {
+            List<Entry> p = new ArrayList<>();
+            for (Entry e : lines) {
+                for (String s : PROBLEMS) {
+                    if (e.text.startsWith(s)) {
+                        p.add(e);
+                        break;
+                    }
+                }
+            }
+            return p;
+        }
+
+        /** Число строк по типам, по убыванию. */
+        Map<String, Integer> typeCounts() {
+            Map<String, Integer> m = new LinkedHashMap<>();
+            for (Entry e : lines) {
+                Integer n = m.get(e.type);
+                m.put(e.type, n == null ? 1 : n + 1);
+            }
+            List<Map.Entry<String, Integer>> l = new ArrayList<>(m.entrySet());
+            Collections.sort(l, (a, b) -> b.getValue() - a.getValue());
+            Map<String, Integer> sorted = new LinkedHashMap<>();
+            for (Map.Entry<String, Integer> e : l) sorted.put(e.getKey(), e.getValue());
+            return sorted;
+        }
+
+        /**
+         * Ход сеанса: питание, отметки, броадкасты, запуски, подключение к машине и сбои.
+         * Паузы дольше PAUSE_MS отмечаются строкой с пустой меткой, текстом «pause …».
+         */
+        List<Entry> timeline() {
+            List<Entry> t = new ArrayList<>();
+            Entry prev = null;
+            for (Entry e : lines) {
+                if (prev != null && e.time - prev.time > PAUSE_MS) {
+                    t.add(new Entry(-1, "", -1, -1, null, "pause " + LogAnalysis.duration(e.time - prev.time)));
+                }
+                prev = e;
+                if (e.isAnchor() || "CAR".equals(e.type) || "SNAPSHOT".equals(e.type) || e.text.startsWith("PROP ERROR")) {
+                    t.add(e);
+                }
+            }
+            return t;
+        }
+    }
+
+    /** Сеансы записи, новые сверху. */
+    List<Session> sessions() {
+        List<Session> list = new ArrayList<>();
+        Session cur = null;
+        for (Entry e : entries) {
+            boolean begin = e.text.startsWith("=== recording started");
+            if (cur == null || begin || cur.stopped) {
+                Session s = new Session();
+                if (cur != null) s.gapBefore = Math.max(0, e.time - cur.last().time);
+                list.add(s);
+                cur = s;
+            }
+            cur.lines.add(e);
+            if (e.text.startsWith("=== recording stopped")) cur.stopped = true;
+        }
+        Collections.reverse(list);
+        return list;
+    }
+
+    /** Длительность «ч:мм:сс», для суток и больше — «N d ч:мм:сс». */
+    static String duration(long ms) {
+        long s = Math.max(0, ms) / 1000;
+        long d = s / 86400;
+        String hms = String.format(Locale.US, "%d:%02d:%02d", s % 86400 / 3600, s % 3600 / 60, s % 60);
+        return d > 0 ? d + " d " + hms : hms;
+    }
+
+    /** Отчёт о сеансе для файла. */
+    static String format(Session s) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("EISDiag recording session\n");
+        sb.append(String.format(Locale.US, "%-12s", "start")).append(s.first().stamp).append('\n');
+        sb.append(String.format(Locale.US, "%-12s", "end")).append(s.last().stamp).append(s.stopped ? "  (stopped)" : "").append('\n');
+        sb.append(String.format(Locale.US, "%-12s", "duration")).append(duration(s.duration())).append('\n');
+        if (s.gapBefore >= 0) sb.append(String.format(Locale.US, "%-12s", "off before")).append(duration(s.gapBefore)).append('\n');
+        sb.append(String.format(Locale.US, "%-12s", "reason")).append(s.reason()).append('\n');
+        sb.append(String.format(Locale.US, "%-12s", "last power")).append(s.lastPower().isEmpty() ? "-" : s.lastPower()).append('\n');
+        sb.append(String.format(Locale.US, "%-11s", "lines"));
+        for (Map.Entry<String, Integer> c : s.typeCounts().entrySet()) sb.append(' ').append(c.getKey()).append(' ').append(c.getValue());
+        sb.append('\n');
+        sb.append(String.format(Locale.US, "%-12s", "problems")).append(s.problems().size()).append("\n\n");
+        for (Entry e : s.timeline()) sb.append(timelineLine(s, e)).append('\n');
+        return sb.toString();
+    }
+
+    /** Строка хода сеанса: время от начала сеанса, метка и текст; пауза — отдельной строкой. */
+    static String timelineLine(Session s, Entry e) {
+        if (e.index < 0) return String.format(Locale.US, "%10s  --- %s ---", "", e.text);
+        return String.format(Locale.US, "%10s  %s  %s", "+" + duration(e.time - s.first().time), e.stamp, e.text);
+    }
+
     // ---------------------------------------------------------------- Чтение
 
     /** Читает старый журнал (если есть) и текущий, по порядку. */
