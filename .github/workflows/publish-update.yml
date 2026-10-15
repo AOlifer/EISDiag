@@ -1,14 +1,16 @@
 # Публикация обновления на eisapp.ru (свой сервер обновлений).
 #
 # Срабатывает, когда в master меняется docs/updates/latest — то есть в тот же момент, когда новая
-# версия появляется на GitHub Pages для уже установленных копий. Можно запустить и вручную:
+# версия появляется на GitHub Pages для уже установленных копий, — или сам этот файл.
+# Можно запустить и вручную:
 # Actions → «Публикация обновления на eisapp.ru» → Run workflow.
 #
 # Что делает:
 #   1. Берёт описание версии из docs/updates/latest и скачивает APK из выпуска на GitHub по ссылке
 #      оттуда (ссылка вида https://github.com/<владелец>/<репозиторий>/releases/download/<тег>/<файл>).
 #   2. Сверяет размер и sha256 с описанием.
-#   3. Загружает по FTP: APK в updates/eisdiag/<версия>/, затем releases.json (история версий),
+#   3. Загружает по FTP: .htaccess (latest отдаётся как текст в UTF-8, как у EISWM),
+#      APK в updates/eisdiag/<версия>/, затем releases.json (история версий),
 #      последним — latest с адресом APK на eisapp.ru. Приложение берёт обновления только с eisapp.ru,
 #      поэтому запасных ссылок на GitHub в latest нет.
 #
@@ -28,6 +30,7 @@ on:
     branches: [master]
     paths:
       - 'docs/updates/latest'
+      - '.github/workflows/publish-update.yml'
   workflow_dispatch:
 
 concurrency:
@@ -150,7 +153,16 @@ jobs:
             work/releases.json > work/releases.new.json
           mv work/releases.new.json work/releases.json
 
+          # У latest нет расширения: без этого сервер отдаёт его без Content-Type, и браузер
+          # показывает русский текст кракозябрами (приложение читает UTF-8 и так). Тип как у
+          # updates/eiswm/latest: text/plain, кодировку UTF-8 добавляет AddDefaultCharset сайта.
+          printf '%s\n' \
+            '# Описание версии без расширения — текст в UTF-8 (файл выкладывает workflow EISDiag)' \
+            '<Files "latest">' \
+            '  ForceType text/plain' \
+            '</Files>' > work/.htaccess
+
           # Сначала APK, потом история, последним latest — чтобы приложение не увидело версию
           # раньше, чем файл доступен.
-          remote "mkdir -p -f $dir/$VER; put -O $dir/$VER work/$FILE; put -O $dir work/releases.json; put -O $dir work/latest"
+          remote "mkdir -p -f $dir/$VER; put -O $dir work/.htaccess; put -O $dir/$VER work/$FILE; put -O $dir work/releases.json; put -O $dir work/latest"
           echo "Опубликовано: $PUBLIC_URL/latest"
