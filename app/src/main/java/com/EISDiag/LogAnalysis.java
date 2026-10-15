@@ -1,0 +1,291 @@
+package com.EISDiag;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
+
+/**
+ * Разбор журнала events.log для экрана «Анализ»: строки с временем и типом, опорные события
+ * и окно вокруг события. Без зависимостей от Android, чтобы проверять отдельно.
+ *
+ * Метка времени: «ГГГГ-ММ-ДД чч:мм:сс.ммм», в журналах до появления года — «ММ-ДД чч:мм:сс.ммм».
+ * Для старых строк год восстанавливается с конца: от года более поздней строки или года
+ * изменения файла, а переход назад через Новый год (январь → декабрь) уменьшает год на 1.
+ */
+final class LogAnalysis {
+    /** Типы строк, вокруг которых строится окно. */
+    static final String MARK = "MARK", POWER = "POWER", BROADCAST = "BROADCAST", START = "START";
+    /** Изменения состояния, которые считаются в сводке окна. */
+    static final String[] CHANGE_TYPES = {"PROP", "SETTING", "SYSPROP"};
+    /** Не больше стольких строк по каждую сторону от события: непрерывные свойства шумят. */
+    static final int MAX_SIDE_LINES = 3000;
+
+    /** Строка журнала. */
+    static final class Entry {
+        /** Номер строки по порядку в обоих файлах (events.1.log, затем events.log). */
+        final int index;
+        /** Время в мс; для строк без метки — время предыдущей строки. */
+        long time;
+        /** Метка времени, как в файле. */
+        final String stamp;
+        /** Первое слово после метки: MARK, PROP, POWER…; «===» для служебных строк. */
+        final String type;
+        /** Текст после метки. */
+        final String text;
+        /** Месяц, день и время старой метки без года; -1 у новых строк. */
+        final int month, day;
+        final String clock;
+
+        Entry(int index, String stamp, int month, int day, String clock, String text) {
+            this.index = index;
+            this.stamp = stamp;
+            this.month = month;
+            this.day = day;
+            this.clock = clock;
+            this.text = text;
+            int sp = text.indexOf(' ');
+            this.type = sp < 0 ? text : text.substring(0, sp);
+        }
+
+        boolean isAnchor() {
+            return MARK.equals(type) || POWER.equals(type) || BROADCAST.equals(type)
+                    || START.equals(type) || "===".equals(type);
+        }
+    }
+
+    /** Окно вокруг события: строки до и после в пределах ±seconds. */
+    static final class Window {
+        final Entry anchor;
+        final int seconds;
+        final List<Entry> lines = new ArrayList<>();
+        /** Сколько строк не вошло из-за MAX_SIDE_LINES. */
+        int truncated;
+
+        Window(Entry anchor, int seconds) {
+            this.anchor = anchor;
+            this.seconds = seconds;
+        }
+
+        /** Число изменений по типам (PROP, SETTING, SYSPROP), без нулевых. */
+        Map<String, Integer> changeCounts() {
+            Map<String, Integer> m = new LinkedHashMap<>();
+            for (String t : CHANGE_TYPES) {
+                int n = 0;
+                for (Entry e : lines) if (t.equals(e.type)) n++;
+                if (n > 0) m.put(t, n);
+            }
+            return m;
+        }
+
+        /** Сколько разных свойств, ключей Settings и свойств системы менялось. */
+        int changedKeys() {
+            List<String> keys = new ArrayList<>();
+            for (Entry e : lines) {
+                String k = changeKey(e);
+                if (k != null && !keys.contains(k)) keys.add(k);
+            }
+            return keys.size();
+        }
+    }
+
+    private final List<Entry> entries;
+
+    private LogAnalysis(List<Entry> entries) {
+        this.entries = entries;
+    }
+
+    List<Entry> entries() {
+        return entries;
+    }
+
+    /** Опорные события, новые сверху. */
+    List<Entry> anchors() {
+        List<Entry> a = new ArrayList<>();
+        for (Entry e : entries) if (e.isAnchor()) a.add(e);
+        Collections.reverse(a);
+        return a;
+    }
+
+    /**
+     * Строки в пределах ±seconds от события. Идём от события в обе стороны, пока время
+     * не выйдет за окно, а не отбираем по времени весь журнал: при скачке часов машины
+     * (синхронизация времени) в окно не попадут строки из другого сеанса.
+     */
+    Window window(Entry anchor, int seconds) {
+        Window w = new Window(anchor, seconds);
+        long span = seconds * 1000L;
+        int i = anchor.index;
+        List<Entry> before = new ArrayList<>();
+        for (int j = i - 1; j >= 0; j--) {
+            Entry e = entries.get(j);
+            if (Math.abs(anchor.time - e.time) > span) break;
+            if (before.size() >= MAX_SIDE_LINES) {
+                w.truncated++;
+                continue;
+            }
+            before.add(e);
+        }
+        Collections.reverse(before);
+        w.lines.addAll(before);
+        w.lines.add(anchor);
+        int after = 0;
+        for (int j = i + 1; j < entries.size(); j++) {
+            Entry e = entries.get(j);
+            if (Math.abs(e.time - anchor.time) > span) break;
+            if (after >= MAX_SIDE_LINES) {
+                w.truncated++;
+                continue;
+            }
+            w.lines.add(e);
+            after++;
+        }
+        return w;
+    }
+
+    /**
+     * Ключ изменения: свойство с зоной, ключ Settings или свойство системы — всё до « = ».
+     * null, если строка не изменение.
+     */
+    static String changeKey(Entry e) {
+        boolean change = false;
+        for (String t : CHANGE_TYPES) if (t.equals(e.type)) change = true;
+        if (!change) return null;
+        int eq = e.text.indexOf(" = ");
+        return eq < 0 ? e.text : e.text.substring(0, eq);
+    }
+
+    /** Смещение от события: «−3.2 s», «+0.0 s». */
+    static String offset(Entry anchor, Entry e) {
+        long d = e.time - anchor.time;
+        return String.format(Locale.US, "%s%d.%d s", d < 0 ? "-" : "+", Math.abs(d) / 1000, Math.abs(d) % 1000 / 100);
+    }
+
+    /** Текст окна для файла: заголовок и строки со смещением от события. */
+    static String format(Window w) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("EISDiag log window ±").append(w.seconds).append(" s around:\n");
+        sb.append(w.anchor.stamp).append("  ").append(w.anchor.text).append("\n");
+        Map<String, Integer> counts = w.changeCounts();
+        sb.append("changes:");
+        if (counts.isEmpty()) sb.append(" none");
+        for (Map.Entry<String, Integer> c : counts.entrySet()) sb.append(' ').append(c.getKey()).append(' ').append(c.getValue());
+        sb.append(", keys ").append(w.changedKeys());
+        if (w.truncated > 0) sb.append(", not shown ").append(w.truncated);
+        sb.append("\n\n");
+        for (Entry e : w.lines) {
+            sb.append(e == w.anchor ? ">> " : "   ");
+            sb.append(String.format(Locale.US, "%9s  ", offset(w.anchor, e)));
+            sb.append(e.stamp).append("  ").append(e.text).append('\n');
+        }
+        return sb.toString();
+    }
+
+    // ---------------------------------------------------------------- Чтение
+
+    /** Читает старый журнал (если есть) и текущий, по порядку. */
+    static LogAnalysis load(File old, File current) {
+        List<Entry> list = new ArrayList<>();
+        long modified = 0;
+        for (File f : new File[]{old, current}) {
+            if (f == null || !f.isFile()) continue;
+            modified = Math.max(modified, f.lastModified());
+            try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = r.readLine()) != null) {
+                    Entry e = parse(list.size(), line);
+                    if (e != null) list.add(e);
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        resolveTimes(list, modified > 0 ? modified : System.currentTimeMillis(), TimeZone.getDefault());
+        return new LogAnalysis(list);
+    }
+
+    /** Для проверки без файлов. */
+    static LogAnalysis of(List<String> lines, long lastModified, TimeZone tz) {
+        List<Entry> list = new ArrayList<>();
+        for (String line : lines) {
+            Entry e = parse(list.size(), line);
+            if (e != null) list.add(e);
+        }
+        resolveTimes(list, lastModified, tz);
+        return new LogAnalysis(list);
+    }
+
+    /**
+     * Строка журнала: «2026-10-15 13:12:08.123  TEXT» или старая «10-15 13:12:08.123  TEXT».
+     * Пустые строки пропускаются, строки без метки остаются с пустой меткой.
+     */
+    static Entry parse(int index, String line) {
+        if (line.trim().isEmpty()) return null;
+        if (line.length() > 25 && isStamp(line, true) && line.startsWith("  ", 23)) {
+            return new Entry(index, line.substring(0, 23), -1, -1, null, line.substring(25));
+        }
+        if (line.length() > 20 && isStamp(line, false) && line.startsWith("  ", 18)) {
+            int month = Integer.parseInt(line.substring(0, 2));
+            int day = Integer.parseInt(line.substring(3, 5));
+            return new Entry(index, line.substring(0, 18), month, day, line.substring(6, 18), line.substring(20));
+        }
+        return new Entry(index, "", -1, -1, null, line);
+    }
+
+    /** Шаблон метки: цифры на местах «ГГГГ-ММ-ДД чч:мм:сс.ммм» (или без «ГГГГ-»). */
+    private static boolean isStamp(String s, boolean withYear) {
+        String p = withYear ? "dddd-dd-dd dd:dd:dd.ddd" : "dd-dd dd:dd:dd.ddd";
+        for (int i = 0; i < p.length(); i++) {
+            char c = s.charAt(i), want = p.charAt(i);
+            if (want == 'd' ? c < '0' || c > '9' : c != want) return false;
+        }
+        return true;
+    }
+
+    /** Время каждой строки в мс; год старых строк восстанавливается с конца журнала. */
+    private static void resolveTimes(List<Entry> list, long lastModified, TimeZone tz) {
+        Calendar cal = Calendar.getInstance(tz, Locale.US);
+        cal.setTimeInMillis(lastModified);
+        int year = cal.get(Calendar.YEAR);
+        int laterMonth = -1;
+        for (int i = list.size() - 1; i >= 0; i--) {
+            Entry e = list.get(i);
+            if (e.stamp.length() == 23) {
+                year = Integer.parseInt(e.stamp.substring(0, 4));
+                laterMonth = Integer.parseInt(e.stamp.substring(5, 7));
+                e.time = millis(cal, year, laterMonth, Integer.parseInt(e.stamp.substring(8, 10)), e.stamp.substring(11));
+            } else if (e.month > 0) {
+                // Идём назад во времени: месяц вырос сильно (январь → декабрь) — это прошлый год.
+                if (laterMonth > 0 && e.month > laterMonth + 6) year--;
+                laterMonth = e.month;
+                e.time = millis(cal, year, e.month, e.day, e.clock);
+            } else {
+                e.time = Long.MIN_VALUE;
+            }
+        }
+        // Строки без метки получают время предыдущей.
+        long prev = 0;
+        for (Entry e : list) {
+            if (e.time == Long.MIN_VALUE) e.time = prev;
+            prev = e.time;
+        }
+    }
+
+    private static long millis(Calendar cal, int year, int month, int day, String clock) {
+        cal.clear();
+        cal.set(year, month - 1, day,
+                Integer.parseInt(clock.substring(0, 2)),
+                Integer.parseInt(clock.substring(3, 5)),
+                Integer.parseInt(clock.substring(6, 8)));
+        cal.set(Calendar.MILLISECOND, Integer.parseInt(clock.substring(9, 12)));
+        return cal.getTimeInMillis();
+    }
+}

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Анализ журнала: опорные события слева, окно вокруг выбранного события справа. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout style="@style/EISDiag.TopBar">
+
+        <Button
+            android:id="@+id/btnBack"
+            style="@style/EISDiag.TextButton"
+            android:text="@string/back" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:singleLine="true"
+            android:text="@string/analysis_title"
+            android:textColor="@color/text_primary"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnSaveWindow"
+            style="@style/EISDiag.TextButton"
+            android:text="@string/analysis_save_window" />
+
+        <Button
+            android:id="@+id/btnRefresh"
+            style="@style/EISDiag.TextButton"
+            android:text="@string/refresh" />
+    </LinearLayout>
+
+    <View style="@style/EISDiag.Divider" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <!-- Опорные события: фильтр по типу и список, новые сверху. -->
+        <LinearLayout
+            style="@style/EISDiag.SidePanel"
+            android:layout_width="@dimen/side_panel_width">
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/typeFilters"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <ScrollView
+                android:id="@+id/anchorScroll"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="6dp"
+                android:layout_weight="1">
+
+                <LinearLayout
+                    android:id="@+id/anchorList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </ScrollView>
+
+            <TextView
+                android:id="@+id/anchorCount"
+                style="@style/EISDiag.Caption"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+        <View style="@style/EISDiag.VDivider" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/surface"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <TextView
+                android:id="@+id/windowTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:textColor="@color/text_primary"
+                android:textSize="19sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/windowSummary"
+                style="@style/EISDiag.Caption"
+                android:layout_marginTop="2dp" />
+
+            <!-- Ширина окна: ±5, 10, 30, 60 с. -->
+            <LinearLayout
+                android:id="@+id/windowSizes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal" />
+
+            <View
+                style="@style/EISDiag.Divider"
+                android:layout_marginTop="6dp" />
+
+            <ScrollView
+                android:id="@+id/windowScroll"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/windowText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:paddingTop="8dp"
+                    android:textColor="@color/text_primary"
+                    android:textIsSelectable="true"
+                    android:textSize="13sp" />
+            </ScrollView>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

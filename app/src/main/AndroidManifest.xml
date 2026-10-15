@@ -38,6 +38,9 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".AnalysisActivity"
+            android:exported="false" />
+        <activity
             android:name=".PickerActivity"
             android:exported="false" />
         <service
