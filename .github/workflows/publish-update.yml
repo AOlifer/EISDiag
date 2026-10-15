@@ -9,8 +9,8 @@
 #      оттуда (ссылка вида https://github.com/<владелец>/<репозиторий>/releases/download/<тег>/<файл>).
 #   2. Сверяет размер и sha256 с описанием.
 #   3. Загружает по FTP: APK в updates/eisdiag/<версия>/, затем releases.json (история версий),
-#      последним — latest с адресом APK на eisapp.ru (и ссылкой на GitHub как запасной, если
-#      репозиторий публичный).
+#      последним — latest с адресом APK на eisapp.ru. Приложение берёт обновления только с eisapp.ru,
+#      поэтому запасных ссылок на GitHub в latest нет.
 #
 # Порядок выпуска не меняется: собрать APK, создать выпуск на GitHub с APK, обновить
 # docs/updates/latest и слить в master.
@@ -113,14 +113,10 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Подготовить описание для eisapp.ru
-        env:
-          PRIVATE_REPO: ${{ github.event.repository.private }}
         run: |
           set -euo pipefail
-          # Для публичного репозитория ссылка на выпуск GitHub остаётся запасной (mirrors).
-          if [ "$PRIVATE_REPO" = "true" ]; then mirrors='[]'; else mirrors="[\"$SRC\"]"; fi
-          jq --arg apk "$PUBLIC_URL/$VER/$FILE" --argjson mirrors "$mirrors" \
-            '.apk = $apk | if ($mirrors | length) > 0 then .mirrors = $mirrors else del(.mirrors) end' \
+          # Только адрес на eisapp.ru, без запасных ссылок на GitHub.
+          jq --arg apk "$PUBLIC_URL/$VER/$FILE" '.apk = $apk | del(.mirrors)' \
             docs/updates/latest > work/latest
           cat work/latest
 

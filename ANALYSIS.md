@@ -5,7 +5,7 @@
 
 ## Происхождение
 
-EISDiag выделен из [EISWM](https://github.com/AOlifer/EISWM) («Менеджер приветствия»), где
+EISDiag выделен из [EISWM](https://eisapp.ru/eiswm) («Менеджер приветствия»), где
 диагностика была скрытым экраном. Её задача там — понять, какие свойства и события машины
 сопровождают приветствие, прощание, сон и пробуждение головного устройства, чтобы EISWM
 мог на них опираться. Отдельное приложение (`applicationId com.EISDiag`) ставится рядом
@@ -144,15 +144,13 @@ PKCS#12 для Gradle собирается из них автоматическ�
 ## Обновления
 
 Приложение проверяет обновления само (при запуске не чаще раза в сутки) и по кнопке
-«Проверить обновления» в шапке Помощи. Описание последней версии — JSON; адреса — массив
-`update_urls` в `config.xml`: `https://eisapp.ru/updates/eisdiag/latest` и
-`https://aolifer.github.io/EISDiag/updates/latest` (файл `docs/updates/latest`, GitHub Pages
-из ветки `master`, папка `/docs`). Опрашиваются оба, берётся самая новая версия, при равных —
-eisapp.ru:
+«Проверить обновления» в шапке Помощи. Описание последней версии — JSON по адресу
+`https://eisapp.ru/updates/eisdiag/latest` (массив `update_urls` в `config.xml`, только свой
+сервер; к GitHub приложение за обновлениями не обращается):
 
 ```json
 {"versionCode": 6, "versionName": "0.2", "date": "2026-10-05",
- "apk": "https://github.com/AOlifer/EISDiag/releases/download/0.2/EISDiag-0.2.apk",
+ "apk": "https://eisapp.ru/updates/eisdiag/0.2/EISDiag-0.2.apk",
  "size": 1234567, "sha256": "…",
  "changes": {"ru": "…", "en": "…", "de": "…", "zh": "…"}}
 ```
@@ -166,11 +164,13 @@ eisapp.ru:
 Публикация на eisapp.ru — `.github/workflows/publish-update.yml`. Когда в `master` меняется
 `docs/updates/latest`, workflow скачивает APK из выпуска GitHub по ссылке оттуда, сверяет размер
 и `sha256` и выкладывает по FTP в `updates/eisdiag/<версия>/`, затем `releases.json` (история
-версий) и последним `latest` с адресом APK на eisapp.ru (ссылка на выпуск GitHub — в `mirrors`). Нужны секреты
-репозитория `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD` (те же, что у сайта); можно запустить
-и вручную: Actions → «Публикация обновления на eisapp.ru».
-Уже установленные версии знают только адрес GitHub Pages, поэтому `docs/updates/latest` в `master`
-по-прежнему обновляется при каждом выпуске.
+версий) и последним `latest` с адресом APK на eisapp.ru, без запасных ссылок на GitHub. Нужны
+секреты репозитория `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD` (те же, что у сайта); можно
+запустить и вручную: Actions → «Публикация обновления на eisapp.ru».
+
+Версия 0.1 знает только адрес `https://aolifer.github.io/EISDiag/updates/latest` (GitHub Pages,
+файл `docs/updates/latest` из `master`). Чтобы она смогла перейти на версию, которая берёт
+обновления с eisapp.ru, `docs/updates/latest` в `master` по-прежнему обновляется при каждом выпуске.
 
 ## Ветки
 
