@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Обновления: JSON с последней версией (формат — в Updater.java и README). Вариант emulator переопределяет update_can_install. -->
-    <string name="update_url" translatable="false">https://aolifer.github.io/EISDiag/updates/latest</string>
+    <!-- Только свой сервер eisapp.ru. Если адресов несколько, берётся самая новая версия; при равных — первый в списке. -->
+    <string-array name="update_urls" translatable="false">
+        <item>https://eisapp.ru/updates/eisdiag/latest</item>
+    </string-array>
     <bool name="update_can_install">true</bool>
 </resources>

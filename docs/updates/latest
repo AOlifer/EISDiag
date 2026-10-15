@@ -1,14 +1,14 @@
 {
-  "versionCode": 10,
-  "versionName": "0.1",
-  "date": "2026-10-05",
-  "apk": "https://github.com/AOlifer/EISDiag/releases/download/0.1/EISDiag-0.1.apk",
-  "size": 114795,
-  "sha256": "24924d4a2ebba6f13495b926b6768337683364e98a2b8a5107ae786d883adb18",
+  "versionCode": 11,
+  "versionName": "0.1.1",
+  "date": "2026-10-15",
+  "apk": "https://github.com/AOlifer/EISDiag/releases/download/0.1.1/EISDiag-0.1.1.apk",
+  "size": 115451,
+  "sha256": "938a0d9cec40efbf5cf3830ce0bd7a9786a97ff8958c7c43bb27c9b646480e90",
   "changes": {
-    "ru": "• Первая версия: диагностика машины, выделенная из EISWM в отдельное приложение.\n• Снимок свойств машины, запись событий в фоне (продолжается после сна и перезагрузки), отметки в журнале и сохранение файлов на флешку. Только чтение.\n• Своя иконка, светлая и тёмная тема, Помощь, проверка и установка обновлений.",
-    "en": "• First version: car diagnostics split out of EISWM into a separate app.\n• Snapshot of car properties, background event recording (continues after sleep and reboot), log marks and saving files to a USB drive. Read-only.\n• Own icon, light and dark theme, Help, checking and installing updates.",
-    "de": "• Erste Version: Fahrzeugdiagnose aus EISWM als eigene App ausgegliedert.\n• Momentaufnahme der Fahrzeugeigenschaften, Ereignisaufzeichnung im Hintergrund (läuft nach Ruhezustand und Neustart weiter), Markierungen im Protokoll und Speichern auf einen USB-Stick. Nur Lesen.\n• Eigenes Symbol, helles und dunkles Design, Hilfe, Suchen und Installieren von Updates.",
-    "zh": "• 首个版本：车辆诊断从 EISWM 中拆分为独立应用。\n• 车辆属性快照、后台事件记录（休眠和重启后继续）、日志标记以及将文件保存到 U 盘。只读。\n• 独立图标、浅色和深色主题、帮助、检查并安装更新。"
+    "ru": "• Технический выпуск: обновления теперь проверяются и скачиваются только с сайта eisapp.ru.\n• В Помощи вместо ссылки на GitHub — адрес сайта https://eisapp.ru/eisdiag.",
+    "en": "• Maintenance release: updates are now checked and downloaded only from eisapp.ru.\n• Help now links to https://eisapp.ru/eisdiag instead of GitHub.",
+    "de": "• Wartungsversion: Updates werden jetzt nur noch von eisapp.ru gesucht und heruntergeladen.\n• Die Hilfe verweist jetzt auf https://eisapp.ru/eisdiag statt auf GitHub.",
+    "zh": "• 维护版本：现在仅从 eisapp.ru 检查和下载更新。\n• 帮助中的 GitHub 链接已替换为网站 https://eisapp.ru/eisdiag。"
   }
 }
