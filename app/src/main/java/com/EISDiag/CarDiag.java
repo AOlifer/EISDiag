@@ -30,7 +30,7 @@ import java.util.TimeZone;
 final class CarDiag {
     /** Журнал событий; при превышении размера старый переименовывается в events.1.log. */
     static final String LOG_NAME = "events.log";
-    private static final String LOG_OLD_NAME = "events.1.log";
+    static final String LOG_OLD_NAME = "events.1.log";
     private static final long LOG_MAX_BYTES = 4L * 1024 * 1024;
 
     /** Свойства системы, которые относятся к приветствию, прощанию и питанию. */
@@ -66,7 +66,7 @@ final class CarDiag {
 
     private static final Object LOCK = new Object();
     /** Метка времени в журнале; SimpleDateFormat не потокобезопасен, используется под LOCK. */
-    private static final SimpleDateFormat LOG_TIME = new SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US);
+    private static final SimpleDateFormat LOG_TIME = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US);
     private static Map<Integer, String> names;
 
     private CarDiag() {}
