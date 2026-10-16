@@ -41,6 +41,8 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * справа их ход: питание, отметки, броадкасты, паузы и сбои.
  * «Сценарий»: все события одного вида (например, каждое пробуждение) совмещаются, справа —
  * что меняется или происходит рядом в нескольких циклах, сначала то, что было в каждом.
+ * «Свойства»: какие свойства машины, ключи Settings и свойства системы менялись, сколько раз,
+ * с какими значениями; самые шумные сверху.
  * Окно или отчёт о сеансе можно сохранить файлом рядом с журналом — он уйдёт на флешку вместе с ним.
  */
 public class AnalysisActivity extends BaseActivity {
@@ -70,7 +72,12 @@ public class AnalysisActivity extends BaseActivity {
     private TextView selectedRow;
     private int seconds = 10;
     private LogAnalysis.Window window;
-    private static final int MODE_EVENTS = 0, MODE_SESSIONS = 1, MODE_SCENARIO = 2;
+    private static final int MODE_EVENTS = 0, MODE_SESSIONS = 1, MODE_SCENARIO = 2, MODE_STATS = 3;
+    /** Статистика по ключам считается вместе с чтением журнала; выбранный ключ. */
+    private List<LogAnalysis.KeyStats> stats;
+    private String statKey;
+    /** Не больше стольких ключей в списке и значений справа. */
+    private static final int MAX_KEYS = 500, MAX_VALUES = 30;
     private int mode = MODE_EVENTS;
     private LogAnalysis.Session session;
     /** Выбранный вид события в режиме «Сценарий» и посчитанный сценарий. */
@@ -121,9 +128,11 @@ public class AnalysisActivity extends BaseActivity {
         File dir = CarDiag.dir(this);
         new Thread(() -> {
             LogAnalysis a = LogAnalysis.load(new File(dir, CarDiag.LOG_OLD_NAME), new File(dir, CarDiag.LOG_NAME));
+            List<LogAnalysis.KeyStats> st = a.keyStats();
             ui.post(() -> {
                 if (destroyed) return;
                 analysis = a;
+                stats = st;
                 showList();
             });
         }, "eisdiag-analysis").start();
@@ -133,7 +142,8 @@ public class AnalysisActivity extends BaseActivity {
 
     private void buildModes() {
         modes.removeAllViews();
-        int[] labels = {R.string.analysis_mode_events, R.string.analysis_mode_sessions, R.string.analysis_mode_scenario};
+        int[] labels = {R.string.analysis_mode_events, R.string.analysis_mode_sessions,
+                R.string.analysis_mode_scenario, R.string.analysis_mode_stats};
         for (int i = 0; i < labels.length; i++) {
             int m = i;
             TextView chip = chip(getString(labels[i]), m == mode);
@@ -146,12 +156,13 @@ public class AnalysisActivity extends BaseActivity {
             modes.addView(chip);
         }
         filterScroll.setVisibility(mode == MODE_EVENTS ? android.view.View.VISIBLE : android.view.View.GONE);
-        sizes.setVisibility(mode == MODE_SESSIONS ? android.view.View.GONE : android.view.View.VISIBLE);
+        sizes.setVisibility(mode == MODE_EVENTS || mode == MODE_SCENARIO ? android.view.View.VISIBLE : android.view.View.GONE);
     }
 
     private void showList() {
         if (mode == MODE_SESSIONS) showSessions();
         else if (mode == MODE_SCENARIO) showKinds();
+        else if (mode == MODE_STATS) showKeys();
         else showAnchors();
     }
 
@@ -331,6 +342,91 @@ public class AnalysisActivity extends BaseActivity {
         }
         windowText.setText(sb);
         windowScroll.post(() -> windowScroll.scrollTo(0, 0));
+    }
+
+    // ---------------------------------------------------------------- Свойства
+
+    /** Ключи, которые менялись: самые частые сверху. */
+    private void showKeys() {
+        anchorList.removeAllViews();
+        selectedRow = null;
+        window = null;
+        if (analysis == null || stats == null) return;
+        if (stats.isEmpty()) {
+            Ui.emptyState(anchorList, getString(R.string.analysis_no_keys), getString(R.string.analysis_no_events_hint));
+            anchorCount.setText(null);
+            statKey = null;
+            showKey(null);
+            return;
+        }
+        List<LogAnalysis.KeyStats> shown = stats.size() > MAX_KEYS ? stats.subList(0, MAX_KEYS) : stats;
+        anchorCount.setText(stats.size() > shown.size()
+                ? getString(R.string.analysis_keys_limited, shown.size(), stats.size())
+                : getString(R.string.analysis_keys, stats.size()));
+        LogAnalysis.KeyStats keep = shown.get(0);
+        for (LogAnalysis.KeyStats k : shown) if (k.key.equals(statKey)) keep = k;
+        for (LogAnalysis.KeyStats k : shown) {
+            TextView row = listRow(getString(R.string.analysis_key_row, k.changes, k.values.size()), k.key);
+            row.setOnClickListener(v -> {
+                highlight((TextView) v);
+                showKey(k);
+            });
+            anchorList.addView(row);
+            if (k == keep) {
+                highlight(row);
+                showKey(k);
+            }
+        }
+        TextView first = selectedRow;
+        if (first != null) anchorScroll.post(() -> anchorScroll.scrollTo(0, Math.max(0, first.getTop() - Ui.dp(this, 40))));
+    }
+
+    /** Справа: сводка по ключу, частые значения и последние изменения. */
+    private void showKey(LogAnalysis.KeyStats k) {
+        if (k == null) {
+            windowTitle.setText(analysis == null ? getString(R.string.analysis_loading) : null);
+            windowSummary.setText(null);
+            windowText.setText(null);
+            return;
+        }
+        statKey = k.key;
+        windowTitle.setText(k.key);
+        List<String> parts = new ArrayList<>();
+        parts.add(getString(R.string.analysis_key_changes, k.changes));
+        if (k.skipped > 0) parts.add(getString(R.string.analysis_key_skipped, k.skipped));
+        parts.add(getString(R.string.analysis_key_values, k.values.size()));
+        if (k.range() != null) parts.add(getString(R.string.analysis_key_range, k.range()));
+        windowSummary.setText(TextUtils.join("  ·  ", parts) + "\n"
+                + getString(R.string.analysis_key_period, k.first.stamp, k.last.stamp));
+
+        SpannableStringBuilder sb = new SpannableStringBuilder();
+        int secondary = getColor(R.color.text_secondary);
+        heading(sb, getString(R.string.analysis_key_top_values));
+        int n = 0;
+        for (Map.Entry<String, Integer> v : k.topValues()) {
+            if (n++ >= MAX_VALUES) {
+                sb.append(getString(R.string.analysis_truncated, k.values.size() - MAX_VALUES)).append('\n');
+                break;
+            }
+            sb.append(String.format(Locale.US, "%7d  %s\n", v.getValue(), v.getKey()));
+        }
+        sb.append('\n');
+        heading(sb, getString(R.string.analysis_key_recent, k.recent.size()));
+        for (int i = k.recent.size() - 1; i >= 0; i--) {
+            LogAnalysis.Entry e = k.recent.get(i);
+            int start = sb.length();
+            sb.append(e.stamp);
+            sb.setSpan(new ForegroundColorSpan(secondary), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            sb.append("  ").append(LogAnalysis.changeValue(e)).append('\n');
+        }
+        windowText.setText(sb);
+        windowScroll.post(() -> windowScroll.scrollTo(0, 0));
+    }
+
+    private static void heading(SpannableStringBuilder sb, String text) {
+        int start = sb.length();
+        sb.append(text).append('\n');
+        sb.setSpan(new StyleSpan(Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 
     // ---------------------------------------------------------------- Сценарий
@@ -515,18 +611,20 @@ public class AnalysisActivity extends BaseActivity {
 
     /**
      * Сохраняет окно (window-….txt), отчёт о сеансе (session-….txt) или сценарий
-     * (scenario-….txt) в папку диагностики;
+     * (scenario-….txt) или таблицу всех ключей (stats-….txt) в папку диагностики;
      * на флешку файл уходит вместе с журналом.
      */
     private void save() {
         String text = mode == MODE_SESSIONS ? (session != null ? LogAnalysis.format(session) : null)
                 : mode == MODE_SCENARIO ? (scenario != null ? LogAnalysis.format(scenario) : null)
+                : mode == MODE_STATS ? (stats != null && !stats.isEmpty() ? LogAnalysis.formatStats(stats) : null)
                 : (window != null ? LogAnalysis.format(window) : null);
         if (text == null) {
             toast(getString(R.string.analysis_nothing_to_save));
             return;
         }
-        String name = (mode == MODE_SESSIONS ? "session-" : mode == MODE_SCENARIO ? "scenario-" : "window-")
+        String name = (mode == MODE_SESSIONS ? "session-" : mode == MODE_SCENARIO ? "scenario-"
+                : mode == MODE_STATS ? "stats-" : "window-")
                 + new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(new Date()) + ".txt";
         File f = new File(CarDiag.dir(this), name);
         try (Writer w = new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8)) {

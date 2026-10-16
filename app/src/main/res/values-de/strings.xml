@@ -93,12 +93,24 @@
     <string name="analysis_scenario_busy">Zyklen werden verglichen…</string>
     <string name="analysis_scenario_summary">Zyklen: %1$d, wiederholte Zeilen: %2$d, Fenster ±%3$d s. Hervorgehoben: in jedem Zyklus vorhanden.</string>
     <string name="analysis_scenario_empty">In der Nähe dieses Ereignisses wiederholt sich nichts in mindestens zwei Zyklen. Versuchen Sie ein breiteres Fenster.</string>
+    <string name="analysis_mode_stats">Eigenschaften</string>
+    <string name="analysis_keys">Geänderte Schlüssel: %1$d</string>
+    <string name="analysis_keys_limited">Die ersten %1$d von %2$d Schlüsseln</string>
+    <string name="analysis_no_keys">Keine Änderungen im Protokoll</string>
+    <string name="analysis_key_row">Änderungen %1$d · Werte %2$d</string>
+    <string name="analysis_key_changes">Änderungen: %1$d</string>
+    <string name="analysis_key_skipped">nicht aufgezeichnet (Ratenbegrenzung): %1$d</string>
+    <string name="analysis_key_values">verschiedene Werte: %1$d</string>
+    <string name="analysis_key_range">Bereich %1$s</string>
+    <string name="analysis_key_period">Erste Änderung %1$s, letzte %2$s</string>
+    <string name="analysis_key_top_values">Werte (wie oft)</string>
+    <string name="analysis_key_recent">Letzte Änderungen (%1$d)</string>
     <string name="analysis_nothing_to_save">Nichts zum Speichern ausgewählt</string>
     <string name="analysis_window_saved">Gespeichert: %1$s. Die Datei wird zusammen mit dem Protokoll auf den USB-Stick kopiert.</string>
 
     <!-- Help -->
     <string name="help">Hilfe</string>
-    <string name="help_text">„Fahrzeugdiagnose“ zeigt, welche Fahrzeugdaten und -ereignisse Apps auf dem Evolute i-Space Infotainmentsystem zur Verfügung stehen. Nur Lesen: Ins Fahrzeug wird nichts geschrieben.\n\nAufzeichnung starten  Hintergrundaufzeichnung von Änderungen der Fahrzeugeigenschaften, Strom- und Ruhezuständen, Broadcasts, Settings-Schlüsseln und Systemeigenschaften. Beim Start wird sofort der Zustand erfasst; die Aufzeichnung läuft nach Neustart und Ruhezustand weiter, bis Sie sie beenden.\n\nSchaltflächen oben (langes Drücken zeigt den Namen):\n⚑  Markierung im Protokoll: einen Moment vor einer Aktion markieren, z. B. „jetzt Tür geöffnet“.\n📷  Fahrzeugzustand erfassen: alle Eigenschaften des Fahrzeugdienstes mit aktuellen Werten, Settings-Schlüssel, Systemeigenschaften.\n🔍  Protokollanalyse: eine Markierung, einen Stromzustand oder einen Broadcast wählen und alles sehen, was Sekunden davor und danach aufgezeichnet wurde, oder Aufzeichnungssitzungen ansehen: wann das Gerät aufwachte und einschlief, Pausen und Fehler; oder ein wiederkehrendes Szenario: was sich bei jedem Aufwachen, jeder Markierung oder jedem Broadcast derselben Art ändert.\n💾  Protokoll und Zustandsaufnahmen auf einen USB-Stick oder in den internen Speicher speichern.\n🗑  Protokoll leeren (Zustandsaufnahmen bleiben erhalten).\n\nToken, Nummern, Adressen, Kennungen und die FIN werden nicht in die Dateien geschrieben. Prüfen Sie die Dateien trotzdem, bevor Sie sie weitergeben.</string>
+    <string name="help_text">„Fahrzeugdiagnose“ zeigt, welche Fahrzeugdaten und -ereignisse Apps auf dem Evolute i-Space Infotainmentsystem zur Verfügung stehen. Nur Lesen: Ins Fahrzeug wird nichts geschrieben.\n\nAufzeichnung starten  Hintergrundaufzeichnung von Änderungen der Fahrzeugeigenschaften, Strom- und Ruhezuständen, Broadcasts, Settings-Schlüsseln und Systemeigenschaften. Beim Start wird sofort der Zustand erfasst; die Aufzeichnung läuft nach Neustart und Ruhezustand weiter, bis Sie sie beenden.\n\nSchaltflächen oben (langes Drücken zeigt den Namen):\n⚑  Markierung im Protokoll: einen Moment vor einer Aktion markieren, z. B. „jetzt Tür geöffnet“.\n📷  Fahrzeugzustand erfassen: alle Eigenschaften des Fahrzeugdienstes mit aktuellen Werten, Settings-Schlüssel, Systemeigenschaften.\n🔍  Protokollanalyse: eine Markierung, einen Stromzustand oder einen Broadcast wählen und alles sehen, was Sekunden davor und danach aufgezeichnet wurde, oder Aufzeichnungssitzungen ansehen: wann das Gerät aufwachte und einschlief, Pausen und Fehler; oder ein wiederkehrendes Szenario: was sich bei jedem Aufwachen, jeder Markierung oder jedem Broadcast derselben Art ändert; oder Eigenschaftsstatistik: was sich wie oft und mit welchen Werten geändert hat.\n💾  Protokoll und Zustandsaufnahmen auf einen USB-Stick oder in den internen Speicher speichern.\n🗑  Protokoll leeren (Zustandsaufnahmen bleiben erhalten).\n\nToken, Nummern, Adressen, Kennungen und die FIN werden nicht in die Dateien geschrieben. Prüfen Sie die Dateien trotzdem, bevor Sie sie weitergeben.</string>
     <string name="help_version">Version %1$s</string>
     <string name="help_developer">Entwickler: AOlifer · Telegram: @oaaspb\nhttps://eisapp.ru/eisdiag\nLizenz PolyForm Noncommercial: nur nicht-kommerzielle Nutzung</string>
     <string name="help_disclaimer_short">⚠ Inoffizielle App, Nutzung auf eigenes Risiko.</string>

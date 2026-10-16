@@ -190,6 +190,115 @@ final class LogAnalysis {
         return sb.toString();
     }
 
+    // ---------------------------------------------------------------- Статистика свойств
+
+    /** Сколько раз менялось одно свойство, ключ Settings или свойство системы и какие были значения. */
+    static final class KeyStats {
+        final String key;
+        int changes;
+        /** Сумма «(+N skipped)»: изменения, которые сервис не записал из-за ограничения частоты. */
+        int skipped;
+        /** Значение → сколько раз, в порядке появления. */
+        final Map<String, Integer> values = new LinkedHashMap<>();
+        Entry first, last;
+        /** Все значения — числа: тогда есть диапазон. */
+        boolean numeric = true;
+        double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
+        /** Последние изменения (не больше MAX_RECENT) — для экрана. */
+        final List<Entry> recent = new ArrayList<>();
+
+        KeyStats(String key) {
+            this.key = key;
+        }
+
+        String type() {
+            int sp = key.indexOf(' ');
+            return sp < 0 ? key : key.substring(0, sp);
+        }
+
+        /** Значения по убыванию числа появлений. */
+        List<Map.Entry<String, Integer>> topValues() {
+            List<Map.Entry<String, Integer>> l = new ArrayList<>(values.entrySet());
+            Collections.sort(l, (a, b) -> b.getValue() - a.getValue());
+            return l;
+        }
+
+        /** Диапазон «min … max» для числовых значений, иначе null. */
+        String range() {
+            if (!numeric || changes == 0) return null;
+            return number(min) + " … " + number(max);
+        }
+
+        private static String number(double d) {
+            return d == Math.rint(d) && Math.abs(d) < 1e15 ? String.valueOf((long) d) : String.valueOf(d);
+        }
+    }
+
+    static final int MAX_RECENT = 50;
+
+    /** Значение изменения: всё после « = » без « status=N» и «(+N skipped)». */
+    static String changeValue(Entry e) {
+        int eq = e.text.indexOf(" = ");
+        if (eq < 0) return "";
+        String v = e.text.substring(eq + 3).replaceFirst("\\s+\\(\\+\\d+ skipped\\)$", "");
+        return v.replaceFirst(" status=-?\\d+$", "");
+    }
+
+    private static final java.util.regex.Pattern SKIPPED = java.util.regex.Pattern.compile("\\(\\+(\\d+) skipped\\)$");
+
+    private static int skippedCount(Entry e) {
+        java.util.regex.Matcher m = SKIPPED.matcher(e.text);
+        return m.find() ? Integer.parseInt(m.group(1)) : 0;
+    }
+
+    /** Статистика по всем ключам, которые менялись, — самые частые сверху. */
+    List<KeyStats> keyStats() {
+        Map<String, KeyStats> m = new LinkedHashMap<>();
+        for (Entry e : entries) {
+            String k = changeKey(e);
+            if (k == null) continue;
+            KeyStats s = m.get(k);
+            if (s == null) m.put(k, s = new KeyStats(k));
+            String v = changeValue(e);
+            s.changes++;
+            s.skipped += skippedCount(e);
+            Integer n = s.values.get(v);
+            s.values.put(v, n == null ? 1 : n + 1);
+            if (s.first == null) s.first = e;
+            s.last = e;
+            if (s.numeric) {
+                try {
+                    double d = Double.parseDouble(v);
+                    s.min = Math.min(s.min, d);
+                    s.max = Math.max(s.max, d);
+                } catch (NumberFormatException ex) {
+                    s.numeric = false;
+                }
+            }
+            s.recent.add(e);
+            if (s.recent.size() > MAX_RECENT) s.recent.remove(0);
+        }
+        List<KeyStats> list = new ArrayList<>(m.values());
+        Collections.sort(list, (a, b) -> b.changes != a.changes ? b.changes - a.changes : a.key.compareTo(b.key));
+        return list;
+    }
+
+    /** Строка таблицы: «изменений  пропущено  значений  ключ  диапазон или частое значение». */
+    static String statsLine(KeyStats s) {
+        String r = s.range();
+        String extra = r != null ? "range " + r : "top " + s.topValues().get(0).getKey();
+        return String.format(Locale.US, "%7d %8d %7d  %s  %s", s.changes, s.skipped, s.values.size(), s.key, extra);
+    }
+
+    /** Таблица всех ключей для файла. */
+    static String formatStats(List<KeyStats> stats) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("EISDiag key statistics: ").append(stats.size()).append(" keys changed\n");
+        sb.append("changes  skipped  values  key  range or most common value\n\n");
+        for (KeyStats s : stats) sb.append(statsLine(s)).append('\n');
+        return sb.toString();
+    }
+
     // ---------------------------------------------------------------- Сценарий
 
     /**
