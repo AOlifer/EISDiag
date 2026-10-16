@@ -108,12 +108,20 @@
     <string name="analysis_key_period">First change %1$s, last %2$s</string>
     <string name="analysis_key_top_values">Values (how many times)</string>
     <string name="analysis_key_recent">Latest changes (%1$d)</string>
+    <string name="analysis_mode_snapshots">Snapshots</string>
+    <string name="analysis_snapshots">Snapshots: %1$d. Tap two to compare.</string>
+    <string name="analysis_no_snapshots">Need at least two snapshots</string>
+    <string name="analysis_no_snapshots_hint">Take a snapshot with the camera icon on the main screen before and after an action in the car.</string>
+    <string name="analysis_choose_two">Choose two snapshots on the left</string>
+    <string name="analysis_diff_busy">Comparing snapshots…</string>
+    <string name="analysis_diff_summary">Changed: %1$d, added: %2$d, removed: %3$d. From A (older) to B (newer).</string>
+    <string name="analysis_diff_same">The snapshots are identical.</string>
     <string name="analysis_nothing_to_save">Nothing selected to save</string>
     <string name="analysis_window_saved">Saved: %1$s. It is copied to the USB drive together with the log.</string>
 
     <!-- Help and disclaimer -->
     <string name="help">Help</string>
-    <string name="help_text">Car Diagnostics shows which car data and events are available to apps on the Evolute i-Space head unit. Read only: nothing is written to the car.\n\nStart recording  background recording of car property changes, power and sleep states, broadcasts, Settings keys and system properties. A snapshot is taken right away; recording continues after a reboot and sleep until you stop it.\n\nButtons at the top (long-press shows the name):\n⚑  Mark in the log: mark a moment before an action, e.g. “opening the door now”.\n📷  Take a snapshot of the car: all properties of the car service with their current values, Settings keys, system properties.\n🔍  Log analysis: pick a mark, power change or broadcast and see everything recorded seconds before and after it, or review recording sessions: when the unit woke up and went to sleep, pauses and errors; or a recurring scenario: what changes near every wake-up, mark or broadcast of the same kind; or property statistics: what changed, how often and with which values.\n💾  Save the log and snapshots to a USB drive or internal memory.\n🗑  Clear the log (snapshots are kept).\n\nTokens, numbers, addresses, identifiers and the VIN are not written to the files. Still, review the files before sharing them.</string>
+    <string name="help_text">Car Diagnostics shows which car data and events are available to apps on the Evolute i-Space head unit. Read only: nothing is written to the car.\n\nStart recording  background recording of car property changes, power and sleep states, broadcasts, Settings keys and system properties. A snapshot is taken right away; recording continues after a reboot and sleep until you stop it.\n\nButtons at the top (long-press shows the name):\n⚑  Mark in the log: mark a moment before an action, e.g. “opening the door now”.\n📷  Take a snapshot of the car: all properties of the car service with their current values, Settings keys, system properties.\n🔍  Log analysis: pick a mark, power change or broadcast and see everything recorded seconds before and after it, or review recording sessions: when the unit woke up and went to sleep, pauses and errors; or a recurring scenario: what changes near every wake-up, mark or broadcast of the same kind; or property statistics: what changed, how often and with which values; or compare two snapshots.\n💾  Save the log and snapshots to a USB drive or internal memory.\n🗑  Clear the log (snapshots are kept).\n\nTokens, numbers, addresses, identifiers and the VIN are not written to the files. Still, review the files before sharing them.</string>
     <string name="help_version">Version %1$s</string>
     <string name="help_developer">Developer: AOlifer · Telegram: @oaaspb\nhttps://eisapp.ru/eisdiag\nLicense PolyForm Noncommercial: non-commercial use only</string>
     <string name="help_disclaimer_short">⚠ Unofficial app, use at your own risk.</string>

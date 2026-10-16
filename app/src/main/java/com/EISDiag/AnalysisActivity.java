@@ -43,6 +43,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * что меняется или происходит рядом в нескольких циклах, сначала то, что было в каждом.
  * «Свойства»: какие свойства машины, ключи Settings и свойства системы менялись, сколько раз,
  * с какими значениями; самые шумные сверху.
+ * «Снимки»: два снимка машины сравниваются, справа только то, что изменилось, появилось или пропало.
  * Окно или отчёт о сеансе можно сохранить файлом рядом с журналом — он уйдёт на флешку вместе с ним.
  */
 public class AnalysisActivity extends BaseActivity {
@@ -72,7 +73,14 @@ public class AnalysisActivity extends BaseActivity {
     private TextView selectedRow;
     private int seconds = 10;
     private LogAnalysis.Window window;
-    private static final int MODE_EVENTS = 0, MODE_SESSIONS = 1, MODE_SCENARIO = 2, MODE_STATS = 3;
+    private static final int MODE_EVENTS = 0, MODE_SESSIONS = 1, MODE_SCENARIO = 2, MODE_STATS = 3, MODE_SNAPSHOTS = 4;
+    /** Выбранные для сравнения снимки (не больше двух) и результат сравнения. */
+    private final List<File> chosen = new ArrayList<>();
+    private SnapshotDiff.Result diff;
+    private String diffA, diffB;
+    private int diffRun;
+    /** Не больше стольких строк сравнения на экране; в файл попадают все. */
+    private static final int MAX_DIFF_LINES = 2000;
     /** Статистика по ключам считается вместе с чтением журнала; выбранный ключ. */
     private List<LogAnalysis.KeyStats> stats;
     private String statKey;
@@ -143,7 +151,7 @@ public class AnalysisActivity extends BaseActivity {
     private void buildModes() {
         modes.removeAllViews();
         int[] labels = {R.string.analysis_mode_events, R.string.analysis_mode_sessions,
-                R.string.analysis_mode_scenario, R.string.analysis_mode_stats};
+                R.string.analysis_mode_scenario, R.string.analysis_mode_stats, R.string.analysis_mode_snapshots};
         for (int i = 0; i < labels.length; i++) {
             int m = i;
             TextView chip = chip(getString(labels[i]), m == mode);
@@ -163,6 +171,7 @@ public class AnalysisActivity extends BaseActivity {
         if (mode == MODE_SESSIONS) showSessions();
         else if (mode == MODE_SCENARIO) showKinds();
         else if (mode == MODE_STATS) showKeys();
+        else if (mode == MODE_SNAPSHOTS) showSnapshots();
         else showAnchors();
     }
 
@@ -338,6 +347,115 @@ public class AnalysisActivity extends BaseActivity {
             } else if (LogAnalysis.POWER.equals(e.type)) {
                 sb.setSpan(new StyleSpan(Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
+            sb.append('\n');
+        }
+        windowText.setText(sb);
+        windowScroll.post(() -> windowScroll.scrollTo(0, 0));
+    }
+
+    // ---------------------------------------------------------------- Снимки
+
+    /** Снимки, новые сверху; выбраны два — справа их сравнение (старый → новый). */
+    private void showSnapshots() {
+        anchorList.removeAllViews();
+        selectedRow = null;
+        window = null;
+        List<File> all = new ArrayList<>();
+        for (File f : CarDiag.files(this)) if (f.getName().startsWith("snapshot-")) all.add(0, f);
+        chosen.retainAll(all);
+        if (all.size() < 2) {
+            Ui.emptyState(anchorList, getString(R.string.analysis_no_snapshots), getString(R.string.analysis_no_snapshots_hint));
+            anchorCount.setText(null);
+            chosen.clear();
+            showDiff();
+            return;
+        }
+        if (chosen.isEmpty()) {
+            chosen.add(all.get(1));
+            chosen.add(all.get(0));
+        }
+        anchorCount.setText(getString(R.string.analysis_snapshots, all.size()));
+        for (File f : all) {
+            TextView row = listRow(snapshotTag(f) + FileUtils.formatSize(this, f.length()), f.getName());
+            if (chosen.contains(f)) row.setBackgroundResource(R.drawable.tab_selected);
+            row.setOnClickListener(v -> {
+                // Нажатие выбирает снимок; третий вытесняет выбранный раньше всех.
+                if (chosen.contains(f)) chosen.remove(f);
+                else {
+                    chosen.add(f);
+                    if (chosen.size() > 2) chosen.remove(0);
+                }
+                int y = anchorScroll.getScrollY();
+                showSnapshots();
+                anchorScroll.post(() -> anchorScroll.scrollTo(0, y));
+            });
+            anchorList.addView(row);
+        }
+        showDiff();
+    }
+
+    /** «A · » у старого из выбранных, «B · » у нового: сравнение идёт от A к B. */
+    private String snapshotTag(File f) {
+        if (!chosen.contains(f) || chosen.size() < 2) return chosen.contains(f) ? "✓ · " : "";
+        File a = older(chosen.get(0), chosen.get(1));
+        return f.equals(a) ? "A · " : "B · ";
+    }
+
+    private static File older(File x, File y) {
+        return x.getName().compareTo(y.getName()) <= 0 ? x : y;
+    }
+
+    /** Сравнение считается в фоне: в снимке сотни свойств и тысячи ключей Settings. */
+    private void showDiff() {
+        diff = null;
+        int run = ++diffRun;
+        if (chosen.size() < 2) {
+            windowTitle.setText(R.string.analysis_choose_two);
+            windowSummary.setText(null);
+            windowText.setText(null);
+            return;
+        }
+        File a = older(chosen.get(0), chosen.get(1));
+        File b = a.equals(chosen.get(0)) ? chosen.get(1) : chosen.get(0);
+        windowTitle.setText(a.getName() + "  →  " + b.getName());
+        windowSummary.setText(R.string.analysis_diff_busy);
+        windowText.setText(null);
+        new Thread(() -> {
+            SnapshotDiff.Result r = SnapshotDiff.diff(SnapshotDiff.parse(a), SnapshotDiff.parse(b));
+            ui.post(() -> {
+                if (destroyed || run != diffRun || mode != MODE_SNAPSHOTS) return;
+                diff = r;
+                diffA = a.getName();
+                diffB = b.getName();
+                renderDiff(r);
+            });
+        }, "eisdiag-diff").start();
+    }
+
+    /** Отличия по разделам: «~» изменилось, «+» появилось (цветом), «-» пропало (серым). */
+    private void renderDiff(SnapshotDiff.Result r) {
+        windowSummary.setText(getString(R.string.analysis_diff_summary, r.changed, r.added, r.removed)
+                + (r.changes.size() > MAX_DIFF_LINES ? "  " + getString(R.string.analysis_truncated, r.changes.size() - MAX_DIFF_LINES) : ""));
+        if (r.changes.isEmpty()) {
+            windowText.setText(R.string.analysis_diff_same);
+            return;
+        }
+        SpannableStringBuilder sb = new SpannableStringBuilder();
+        int secondary = getColor(R.color.text_secondary);
+        int accent = getColor(R.color.accent);
+        String section = null;
+        int n = 0;
+        for (SnapshotDiff.Change c : r.changes) {
+            if (n++ >= MAX_DIFF_LINES) break;
+            if (!c.section.equals(section)) {
+                if (section != null) sb.append('\n');
+                section = c.section;
+                heading(sb, "== " + section);
+            }
+            int start = sb.length();
+            sb.append(SnapshotDiff.line(c));
+            if (c.mark() == '+') sb.setSpan(new ForegroundColorSpan(accent), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            else if (c.mark() == '-') sb.setSpan(new ForegroundColorSpan(secondary), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             sb.append('\n');
         }
         windowText.setText(sb);
@@ -611,20 +729,22 @@ public class AnalysisActivity extends BaseActivity {
 
     /**
      * Сохраняет окно (window-….txt), отчёт о сеансе (session-….txt) или сценарий
-     * (scenario-….txt) или таблицу всех ключей (stats-….txt) в папку диагностики;
+     * (scenario-….txt), таблицу всех ключей (stats-….txt) или сравнение снимков (snapdiff-….txt)
+     * в папку диагностики;
      * на флешку файл уходит вместе с журналом.
      */
     private void save() {
         String text = mode == MODE_SESSIONS ? (session != null ? LogAnalysis.format(session) : null)
                 : mode == MODE_SCENARIO ? (scenario != null ? LogAnalysis.format(scenario) : null)
                 : mode == MODE_STATS ? (stats != null && !stats.isEmpty() ? LogAnalysis.formatStats(stats) : null)
+                : mode == MODE_SNAPSHOTS ? (diff != null ? SnapshotDiff.format(diff, diffA, diffB) : null)
                 : (window != null ? LogAnalysis.format(window) : null);
         if (text == null) {
             toast(getString(R.string.analysis_nothing_to_save));
             return;
         }
         String name = (mode == MODE_SESSIONS ? "session-" : mode == MODE_SCENARIO ? "scenario-"
-                : mode == MODE_STATS ? "stats-" : "window-")
+                : mode == MODE_STATS ? "stats-" : mode == MODE_SNAPSHOTS ? "snapdiff-" : "window-")
                 + new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(new Date()) + ".txt";
         File f = new File(CarDiag.dir(this), name);
         try (Writer w = new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8)) {
