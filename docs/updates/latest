@@ -1,14 +1,14 @@
 {
-  "versionCode": 11,
-  "versionName": "0.1.1",
-  "date": "2026-10-15",
-  "apk": "https://github.com/AOlifer/EISDiag/releases/download/0.1.1/EISDiag-0.1.1.apk",
-  "size": 115451,
-  "sha256": "938a0d9cec40efbf5cf3830ce0bd7a9786a97ff8958c7c43bb27c9b646480e90",
+  "versionCode": 15,
+  "versionName": "0.2",
+  "date": "2026-10-16",
+  "apk": "https://github.com/AOlifer/EISDiag/releases/download/0.2/EISDiag-0.2.apk",
+  "size": 156907,
+  "sha256": "99bd0586839744ef61a2e61197b9bfff7c6c39bdf9a779a82794cf5d2e344a11",
   "changes": {
-    "ru": "• Технический выпуск: обновления теперь проверяются и скачиваются только с сайта eisapp.ru.\n• В Помощи вместо ссылки на GitHub — адрес сайта https://eisapp.ru/eisdiag.",
-    "en": "• Maintenance release: updates are now checked and downloaded only from eisapp.ru.\n• Help now links to https://eisapp.ru/eisdiag instead of GitHub.",
-    "de": "• Wartungsversion: Updates werden jetzt nur noch von eisapp.ru gesucht und heruntergeladen.\n• Die Hilfe verweist jetzt auf https://eisapp.ru/eisdiag statt auf GitHub.",
-    "zh": "• 维护版本：现在仅从 eisapp.ru 检查和下载更新。\n• 帮助中的 GitHub 链接已替换为网站 https://eisapp.ru/eisdiag。"
+    "ru": "• Новый экран «Анализ журнала» (значок с лупой) с режимами «События» (всё, что записано вокруг выбранного события), «Сеансы», «Сценарий» и «Свойства».\n• Результаты анализа сохраняются файлами и копируются на флешку вместе с журналом.\n• В метке времени журнала теперь есть год.",
+    "en": "• New “Log analysis” screen (magnifier icon) with Events (everything recorded around a chosen event), Sessions, Scenario and Properties modes.\n• Analysis results are saved as files and copied to the USB drive together with the log.\n• Log timestamps now include the year.",
+    "de": "• Neuer Bildschirm „Protokollanalyse“ (Lupensymbol) mit den Modi „Ereignisse“ (alles, was rund um ein gewähltes Ereignis aufgezeichnet wurde), „Sitzungen“, „Szenario“ und „Eigenschaften“.\n• Analyseergebnisse werden als Dateien gespeichert und zusammen mit dem Protokoll auf den USB-Stick kopiert.\n• Zeitstempel im Protokoll enthalten jetzt das Jahr.",
+    "zh": "• 新增“日志分析”界面（放大镜图标），包含“事件”（所选事件前后记录的全部内容）、“会话”、“场景”和“属性”模式。\n• 分析结果保存为文件，并与日志一起复制到 U 盘。\n• 日志时间戳现在包含年份。"
   }
 }
