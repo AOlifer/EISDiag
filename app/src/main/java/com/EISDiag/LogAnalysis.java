@@ -190,6 +190,161 @@ final class LogAnalysis {
         return sb.toString();
     }
 
+    // ---------------------------------------------------------------- Сценарий
+
+    /**
+     * Вид опорного события, по которому совмещаются циклы: «MARK», «POWER 2 DEEP_SLEEP_ENTER»,
+     * «BROADCAST <action>», «START <причина>», «=== recording started». null — не опорное.
+     */
+    static String kind(Entry e) {
+        if (!e.isAnchor()) return null;
+        if (MARK.equals(e.type)) return MARK;
+        if (BROADCAST.equals(e.type)) {
+            String[] w = e.text.split(" ");
+            return w.length > 1 ? BROADCAST + " " + w[1] : BROADCAST;
+        }
+        int comma = e.text.indexOf(", process age");
+        if (comma < 0 && "===".equals(e.type)) comma = e.text.indexOf(',');
+        return comma >= 0 ? e.text.substring(0, comma) : e.text;
+    }
+
+    /** Ключ строки в сценарии: изменение (до « = ») или вид опорного события; null — пропустить. */
+    static String scenarioKey(Entry e) {
+        String k = changeKey(e);
+        return k != null ? k : kind(e);
+    }
+
+    /** Виды опорных событий, которые встречаются хотя бы дважды, по убыванию числа. */
+    Map<String, Integer> kinds() {
+        Map<String, Integer> m = new LinkedHashMap<>();
+        for (Entry e : entries) {
+            String k = kind(e);
+            if (k == null) continue;
+            Integer n = m.get(k);
+            m.put(k, n == null ? 1 : n + 1);
+        }
+        List<Map.Entry<String, Integer>> l = new ArrayList<>(m.entrySet());
+        Collections.sort(l, (a, b) -> b.getValue() - a.getValue());
+        Map<String, Integer> sorted = new LinkedHashMap<>();
+        for (Map.Entry<String, Integer> e : l) if (e.getValue() >= 2) sorted.put(e.getKey(), e.getValue());
+        return sorted;
+    }
+
+    /** Строка сценария: что происходит рядом с событием и в скольких циклах. */
+    static final class ScenarioRow {
+        final String key;
+        /** В скольких циклах встретилось. */
+        int cycles;
+        /** Смещение от события в каждом цикле, мс (ближайшее к событию вхождение). */
+        final List<Long> offsets = new ArrayList<>();
+        /** Значение изменения в каждом цикле («1», «true»); null у событий. */
+        final List<String> values = new ArrayList<>();
+
+        ScenarioRow(String key) {
+            this.key = key;
+        }
+
+        long median() {
+            List<Long> o = new ArrayList<>(offsets);
+            Collections.sort(o);
+            return o.get(o.size() / 2);
+        }
+
+        long min() {
+            return Collections.min(offsets);
+        }
+
+        long max() {
+            return Collections.max(offsets);
+        }
+
+        /** Самое частое значение и в скольких циклах оно было; null, если значений нет. */
+        String topValue() {
+            String best = null;
+            int bestN = 0;
+            for (String v : values) {
+                if (v == null) continue;
+                int n = Collections.frequency(values, v);
+                if (n > bestN) {
+                    best = v;
+                    bestN = n;
+                }
+            }
+            return best == null ? null : best + " (" + bestN + "/" + cycles + ")";
+        }
+    }
+
+    /** Повторяющийся сценарий: что есть рядом с событием данного вида в нескольких циклах. */
+    static final class Scenario {
+        final String kind;
+        final int seconds;
+        int cycles;
+        final List<ScenarioRow> rows = new ArrayList<>();
+
+        Scenario(String kind, int seconds) {
+            this.kind = kind;
+            this.seconds = seconds;
+        }
+    }
+
+    /**
+     * Совмещает все события вида kind и собирает, что меняется или происходит в окне ±seconds
+     * в каждом из них. В сценарий попадает то, что было хотя бы в двух циклах; сверху — то,
+     * что было в большем числе циклов, при равенстве — ближе к событию.
+     */
+    Scenario scenario(String kind, int seconds) {
+        Scenario sc = new Scenario(kind, seconds);
+        Map<String, ScenarioRow> rows = new LinkedHashMap<>();
+        for (Entry a : entries) {
+            if (!kind.equals(kind(a))) continue;
+            sc.cycles++;
+            Map<String, Entry> nearest = new LinkedHashMap<>();
+            for (Entry e : window(a, seconds).lines) {
+                if (e == a) continue;
+                String k = scenarioKey(e);
+                if (k == null) continue;
+                Entry prev = nearest.get(k);
+                if (prev == null || Math.abs(e.time - a.time) < Math.abs(prev.time - a.time)) nearest.put(k, e);
+            }
+            for (Map.Entry<String, Entry> n : nearest.entrySet()) {
+                ScenarioRow r = rows.get(n.getKey());
+                if (r == null) rows.put(n.getKey(), r = new ScenarioRow(n.getKey()));
+                Entry e = n.getValue();
+                r.cycles++;
+                r.offsets.add(e.time - a.time);
+                int eq = e.text.indexOf(" = ");
+                r.values.add(changeKey(e) != null && eq >= 0 ? e.text.substring(eq + 3) : null);
+            }
+        }
+        for (ScenarioRow r : rows.values()) if (r.cycles >= 2) sc.rows.add(r);
+        Collections.sort(sc.rows, (x, y) -> x.cycles != y.cycles ? y.cycles - x.cycles
+                : Long.compare(Math.abs(x.median()), Math.abs(y.median())));
+        return sc;
+    }
+
+    /** Строка сценария: «5/5  +0.4 s (+0.1…+0.9)  ключ = значение (5/5)». */
+    static String scenarioLine(Scenario sc, ScenarioRow r) {
+        String spread = r.cycles > 1 ? " (" + seconds(r.min()) + "…" + seconds(r.max()) + ")" : "";
+        String v = r.topValue();
+        return String.format(Locale.US, "%5s  %8s%-20s  %s", r.cycles + "/" + sc.cycles, seconds(r.median()), spread,
+                r.key + (v != null ? " = " + v : ""));
+    }
+
+    private static String seconds(long ms) {
+        return String.format(Locale.US, "%s%d.%d", ms < 0 ? "-" : "+", Math.abs(ms) / 1000, Math.abs(ms) % 1000 / 100);
+    }
+
+    /** Сценарий для файла. */
+    static String format(Scenario sc) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("EISDiag recurring scenario: ").append(sc.kind).append('\n');
+        sb.append("cycles ").append(sc.cycles).append(", window ±").append(sc.seconds).append(" s")
+                .append(", rows ").append(sc.rows.size()).append("\n");
+        sb.append("cycles  median offset s (min…max)  key = most common value (cycles)\n\n");
+        for (ScenarioRow r : sc.rows) sb.append(scenarioLine(sc, r)).append('\n');
+        return sb.toString();
+    }
+
     // ---------------------------------------------------------------- Сеансы
 
     /** Тишина в журнале дольше этого внутри сеанса — пауза (сон без перезапуска процесса). */

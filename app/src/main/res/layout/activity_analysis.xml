@@ -47,13 +47,19 @@
             style="@style/EISDiag.SidePanel"
             android:layout_width="@dimen/side_panel_width">
 
-            <!-- Режим: события (окно вокруг события) или сеансы записи. -->
-            <LinearLayout
-                android:id="@+id/modeTabs"
+            <!-- Режим: события (окно вокруг события), сеансы записи или повторяющийся сценарий. -->
+            <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="6dp"
-                android:orientation="horizontal" />
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/modeTabs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
 
             <HorizontalScrollView
                 android:id="@+id/filterScroll"

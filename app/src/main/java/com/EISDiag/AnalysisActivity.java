@@ -39,6 +39,8 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * что записано за ±N секунд до и после выбранного, со сводкой изменений.
  * «Сеансы»: слева сеансы записи (от запуска процесса сервиса до сна, выключения или остановки),
  * справа их ход: питание, отметки, броадкасты, паузы и сбои.
+ * «Сценарий»: все события одного вида (например, каждое пробуждение) совмещаются, справа —
+ * что меняется или происходит рядом в нескольких циклах, сначала то, что было в каждом.
  * Окно или отчёт о сеансе можно сохранить файлом рядом с журналом — он уйдёт на флешку вместе с ним.
  */
 public class AnalysisActivity extends BaseActivity {
@@ -68,9 +70,16 @@ public class AnalysisActivity extends BaseActivity {
     private TextView selectedRow;
     private int seconds = 10;
     private LogAnalysis.Window window;
-    /** Режим «Сеансы» вместо «События». */
-    private boolean sessionsMode;
+    private static final int MODE_EVENTS = 0, MODE_SESSIONS = 1, MODE_SCENARIO = 2;
+    private int mode = MODE_EVENTS;
     private LogAnalysis.Session session;
+    /** Выбранный вид события в режиме «Сценарий» и посчитанный сценарий. */
+    private String kind;
+    private LogAnalysis.Scenario scenario;
+    /** Номер расчёта сценария: результат устаревшего расчёта (сменили вид или окно) не показывается. */
+    private int scenarioRun;
+    /** Не больше стольких строк сценария на экране; в файл попадают все. */
+    private static final int MAX_SCENARIO_ROWS = 400;
 
     @Override protected void onCreate(Bundle b) {
         super.onCreate(b);
@@ -124,25 +133,25 @@ public class AnalysisActivity extends BaseActivity {
 
     private void buildModes() {
         modes.removeAllViews();
-        int[] labels = {R.string.analysis_mode_events, R.string.analysis_mode_sessions};
+        int[] labels = {R.string.analysis_mode_events, R.string.analysis_mode_sessions, R.string.analysis_mode_scenario};
         for (int i = 0; i < labels.length; i++) {
-            boolean sessions = i == 1;
-            TextView chip = chip(getString(labels[i]), sessions == sessionsMode);
+            int m = i;
+            TextView chip = chip(getString(labels[i]), m == mode);
             chip.setOnClickListener(v -> {
-                if (sessionsMode == sessions) return;
-                sessionsMode = sessions;
+                if (mode == m) return;
+                mode = m;
                 buildModes();
                 showList();
             });
             modes.addView(chip);
         }
-        int events = sessionsMode ? android.view.View.GONE : android.view.View.VISIBLE;
-        filterScroll.setVisibility(events);
-        sizes.setVisibility(events);
+        filterScroll.setVisibility(mode == MODE_EVENTS ? android.view.View.VISIBLE : android.view.View.GONE);
+        sizes.setVisibility(mode == MODE_SESSIONS ? android.view.View.GONE : android.view.View.VISIBLE);
     }
 
     private void showList() {
-        if (sessionsMode) showSessions();
+        if (mode == MODE_SESSIONS) showSessions();
+        else if (mode == MODE_SCENARIO) showKinds();
         else showAnchors();
     }
 
@@ -324,6 +333,97 @@ public class AnalysisActivity extends BaseActivity {
         windowScroll.post(() -> windowScroll.scrollTo(0, 0));
     }
 
+    // ---------------------------------------------------------------- Сценарий
+
+    /** Виды событий, которые повторялись хотя бы дважды: каждый — набор совмещаемых циклов. */
+    private void showKinds() {
+        anchorList.removeAllViews();
+        selectedRow = null;
+        if (analysis == null) return;
+        Map<String, Integer> kinds = analysis.kinds();
+        if (kinds.isEmpty()) {
+            Ui.emptyState(anchorList, getString(R.string.analysis_no_kinds), getString(R.string.analysis_no_kinds_hint));
+            anchorCount.setText(null);
+            kind = null;
+            showScenario();
+            return;
+        }
+        anchorCount.setText(getString(R.string.analysis_kinds, kinds.size()));
+        String keep = kinds.containsKey(kind) ? kind : kinds.keySet().iterator().next();
+        for (Map.Entry<String, Integer> k : kinds.entrySet()) {
+            TextView row = listRow(getString(R.string.analysis_kind_count, k.getValue()), k.getKey());
+            row.setOnClickListener(v -> {
+                highlight((TextView) v);
+                kind = k.getKey();
+                showScenario();
+            });
+            anchorList.addView(row);
+            if (k.getKey().equals(keep)) {
+                highlight(row);
+                kind = keep;
+                showScenario();
+            }
+        }
+        TextView first = selectedRow;
+        if (first != null) anchorScroll.post(() -> anchorScroll.scrollTo(0, Math.max(0, first.getTop() - Ui.dp(this, 40))));
+    }
+
+    /** Сценарий считается в фоне: каждый цикл — своё окно по журналу. */
+    private void showScenario() {
+        window = null;
+        scenario = null;
+        int run = ++scenarioRun;
+        if (analysis == null || kind == null) {
+            windowTitle.setText(analysis == null ? getString(R.string.analysis_loading) : null);
+            windowSummary.setText(null);
+            windowText.setText(null);
+            return;
+        }
+        String k = kind;
+        int sec = seconds;
+        LogAnalysis a = analysis;
+        windowTitle.setText(k);
+        windowSummary.setText(R.string.analysis_scenario_busy);
+        windowText.setText(null);
+        new Thread(() -> {
+            LogAnalysis.Scenario sc = a.scenario(k, sec);
+            ui.post(() -> {
+                if (destroyed || run != scenarioRun || mode != MODE_SCENARIO) return;
+                scenario = sc;
+                renderScenario(sc);
+            });
+        }, "eisdiag-scenario").start();
+    }
+
+    /** Строки сценария: в скольких циклах, смещение (медиана и разброс), ключ и частое значение. */
+    private void renderScenario(LogAnalysis.Scenario sc) {
+        windowSummary.setText(getString(R.string.analysis_scenario_summary, sc.cycles, sc.rows.size(), sc.seconds)
+                + (sc.rows.size() > MAX_SCENARIO_ROWS ? "  " + getString(R.string.analysis_truncated, sc.rows.size() - MAX_SCENARIO_ROWS) : ""));
+        if (sc.rows.isEmpty()) {
+            windowText.setText(R.string.analysis_scenario_empty);
+            return;
+        }
+        SpannableStringBuilder sb = new SpannableStringBuilder();
+        int secondary = getColor(R.color.text_secondary);
+        int accent = getColor(R.color.accent);
+        int n = 0;
+        for (LogAnalysis.ScenarioRow r : sc.rows) {
+            if (n++ >= MAX_SCENARIO_ROWS) break;
+            int start = sb.length();
+            sb.append(LogAnalysis.scenarioLine(sc, r));
+            // Было в каждом цикле — выделено: это кандидаты в «подпись» события.
+            if (r.cycles == sc.cycles) {
+                sb.setSpan(new ForegroundColorSpan(accent), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                sb.setSpan(new StyleSpan(Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else if (r.cycles * 2 < sc.cycles) {
+                sb.setSpan(new ForegroundColorSpan(secondary), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            sb.append('\n');
+        }
+        windowText.setText(sb);
+        windowScroll.post(() -> windowScroll.scrollTo(0, 0));
+    }
+
     // ---------------------------------------------------------------- Окно
 
     private void buildSizes() {
@@ -333,7 +433,8 @@ public class AnalysisActivity extends BaseActivity {
             chip.setOnClickListener(v -> {
                 seconds = s;
                 buildSizes();
-                showWindow();
+                if (mode == MODE_SCENARIO) showScenario();
+                else showWindow();
             });
             sizes.addView(chip);
         }
@@ -413,17 +514,19 @@ public class AnalysisActivity extends BaseActivity {
     }
 
     /**
-     * Сохраняет окно (window-….txt) или отчёт о сеансе (session-….txt) в папку диагностики;
+     * Сохраняет окно (window-….txt), отчёт о сеансе (session-….txt) или сценарий
+     * (scenario-….txt) в папку диагностики;
      * на флешку файл уходит вместе с журналом.
      */
     private void save() {
-        String text = sessionsMode ? (session != null ? LogAnalysis.format(session) : null)
+        String text = mode == MODE_SESSIONS ? (session != null ? LogAnalysis.format(session) : null)
+                : mode == MODE_SCENARIO ? (scenario != null ? LogAnalysis.format(scenario) : null)
                 : (window != null ? LogAnalysis.format(window) : null);
         if (text == null) {
             toast(getString(R.string.analysis_nothing_to_save));
             return;
         }
-        String name = (sessionsMode ? "session-" : "window-")
+        String name = (mode == MODE_SESSIONS ? "session-" : mode == MODE_SCENARIO ? "scenario-" : "window-")
                 + new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(new Date()) + ".txt";
         File f = new File(CarDiag.dir(this), name);
         try (Writer w = new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8)) {

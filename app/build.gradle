@@ -60,7 +60,7 @@ android {
         applicationId 'com.EISDiag'
         minSdk 28
         targetSdk 28
-        versionCode 12
+        versionCode 13
         versionName '0.2'
     }
 

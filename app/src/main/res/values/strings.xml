@@ -88,12 +88,20 @@
     <string name="analysis_session_stopped">stopped with the button</string>
     <string name="analysis_session_problems">problems: %1$d</string>
     <string name="analysis_session_lines">Lines: %1$s</string>
-    <string name="analysis_nothing_to_save">Choose an event or a session first</string>
+    <string name="analysis_mode_scenario">Scenario</string>
+    <string name="analysis_kinds">Event kinds: %1$d</string>
+    <string name="analysis_kind_count">×%1$d</string>
+    <string name="analysis_no_kinds">No repeated events</string>
+    <string name="analysis_no_kinds_hint">A scenario needs at least two events of the same kind, e.g. two wake-ups or two marks.</string>
+    <string name="analysis_scenario_busy">Comparing cycles…</string>
+    <string name="analysis_scenario_summary">Cycles: %1$d, repeated rows: %2$d, window ±%3$d s. Highlighted: present in every cycle.</string>
+    <string name="analysis_scenario_empty">Nothing repeats near this event in two or more cycles. Try a wider window.</string>
+    <string name="analysis_nothing_to_save">Nothing selected to save</string>
     <string name="analysis_window_saved">Saved: %1$s. It is copied to the USB drive together with the log.</string>
 
     <!-- Help and disclaimer -->
     <string name="help">Help</string>
-    <string name="help_text">Car Diagnostics shows which car data and events are available to apps on the Evolute i-Space head unit. Read only: nothing is written to the car.\n\nStart recording  background recording of car property changes, power and sleep states, broadcasts, Settings keys and system properties. A snapshot is taken right away; recording continues after a reboot and sleep until you stop it.\n\nButtons at the top (long-press shows the name):\n⚑  Mark in the log: mark a moment before an action, e.g. “opening the door now”.\n📷  Take a snapshot of the car: all properties of the car service with their current values, Settings keys, system properties.\n🔍  Log analysis: pick a mark, power change or broadcast and see everything recorded seconds before and after it, or review recording sessions: when the unit woke up and went to sleep, pauses and errors.\n💾  Save the log and snapshots to a USB drive or internal memory.\n🗑  Clear the log (snapshots are kept).\n\nTokens, numbers, addresses, identifiers and the VIN are not written to the files. Still, review the files before sharing them.</string>
+    <string name="help_text">Car Diagnostics shows which car data and events are available to apps on the Evolute i-Space head unit. Read only: nothing is written to the car.\n\nStart recording  background recording of car property changes, power and sleep states, broadcasts, Settings keys and system properties. A snapshot is taken right away; recording continues after a reboot and sleep until you stop it.\n\nButtons at the top (long-press shows the name):\n⚑  Mark in the log: mark a moment before an action, e.g. “opening the door now”.\n📷  Take a snapshot of the car: all properties of the car service with their current values, Settings keys, system properties.\n🔍  Log analysis: pick a mark, power change or broadcast and see everything recorded seconds before and after it, or review recording sessions: when the unit woke up and went to sleep, pauses and errors; or a recurring scenario: what changes near every wake-up, mark or broadcast of the same kind.\n💾  Save the log and snapshots to a USB drive or internal memory.\n🗑  Clear the log (snapshots are kept).\n\nTokens, numbers, addresses, identifiers and the VIN are not written to the files. Still, review the files before sharing them.</string>
     <string name="help_version">Version %1$s</string>
     <string name="help_developer">Developer: AOlifer · Telegram: @oaaspb\nhttps://eisapp.ru/eisdiag\nLicense PolyForm Noncommercial: non-commercial use only</string>
     <string name="help_disclaimer_short">⚠ Unofficial app, use at your own risk.</string>
